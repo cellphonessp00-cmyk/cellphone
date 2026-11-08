@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cellphones SP — Smartphones e Periféricos</title>
+  <meta name="description" content="iPhone, Samsung Galaxy e periféricos gamer com entrega rápida. Peça pelo Instagram ou WhatsApp.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topo" id="topo">
+    <div class="wrap topo-in">
+      <a href="#" class="logo"><span class="logo-dot"></span><span data-loja="nome">Cellphones SP</span></a>
+      <nav class="menu" id="menu">
+        <a href="#destaques">Destaques</a>
+        <a href="#catalogo">Catálogo</a>
+        <a href="#instagram">Instagram</a>
+        <a href="#como-comprar">Como comprar</a>
+      </nav>
+      <div class="topo-acoes">
+        <button class="btn-icone" id="abrirBusca" aria-label="Buscar">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </button>
+        <button class="btn-icone carrinho-btn" id="abrirCarrinho" aria-label="Carrinho">
+          <svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg>
+          <span class="contador" id="contador">0</span>
+        </button>
+        <button class="btn-icone so-mobile" id="abrirMenu" aria-label="Menu">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap hero-in">
+        <div class="hero-txt revelar">
+          <span class="pill">Novidades toda semana no <b>@<span data-loja="instagram">cellphones.sp</span></b></span>
+          <h1>Tecnologia que <span class="grad">acompanha</span> você.</h1>
+          <p data-loja="slogan">Periféricos e smartphones com entrega rápida e garantia</p>
+          <div class="hero-ctas">
+            <a href="#catalogo" class="btn btn-prim">Ver catálogo</a>
+            <a href="#" class="btn btn-sec" data-link="instagram">
+              <svg viewBox="0 0 24 24" class="ig"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+              Seguir no Instagram
+            </a>
+          </div>
+          <ul class="selos">
+            <li><b id="totalProdutos">0</b> produtos</li>
+            <li><b><span data-loja="parcelas">12</span>x</b> sem juros</li>
+            <li><b>Envio</b> para todo o Brasil</li>
+          </ul>
+        </div>
+        <div class="hero-arte" id="heroArte" aria-hidden="true"></div>
+      </div>
+      <div class="marcas wrap">
+        <button data-filtro-rapido="Apple">iPhone</button>
+        <button data-filtro-rapido="Samsung">Samsung Galaxy</button>
+        <button data-filtro-rapido="teclados">Teclados</button>
+        <button data-filtro-rapido="mouses">Mouses</button>
+        <button data-filtro-rapido="headsets">Headsets</button>
+        <button data-filtro-rapido="fones">Fones</button>
+      </div>
+    </section>
+
+    <!-- DESTAQUES -->
+    <section class="secao" id="destaques">
+      <div class="wrap">
+        <div class="secao-cab revelar">
+          <div>
+            <h2>Em destaque</h2>
+            <p>Os mais procurados no nosso Instagram esta semana.</p>
+          </div>
+          <div class="setas">
+            <button class="btn-icone" data-rolar="-1" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button>
+            <button class="btn-icone" data-rolar="1" aria-label="Próximo"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
+          </div>
+        </div>
+        <div class="trilho" id="trilhoDestaques"></div>
+      </div>
+    </section>
+
+    <!-- CATÁLOGO -->
+    <section class="secao" id="catalogo">
+      <div class="wrap">
+        <div class="secao-cab revelar">
+          <div>
+            <h2>Catálogo</h2>
+            <p>Disponibilidade atualizada — o mesmo estoque que você vê no Instagram.</p>
+          </div>
+        </div>
+        <div class="filtros revelar">
+          <div class="busca">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="busca" type="search" placeholder="Buscar iPhone, Galaxy, teclado…" autocomplete="off">
+          </div>
+          <select id="ordem" aria-label="Ordenar">
+            <option value="relevancia">Relevância</option>
+            <option value="menor">Menor preço</option>
+            <option value="maior">Maior preço</option>
+            <option value="nome">Nome (A–Z)</option>
+          </select>
+          <label class="toggle"><input type="checkbox" id="soDisponiveis"> <span>Só disponíveis</span></label>
+        </div>
+        <div class="chips" id="chips"></div>
+        <div class="grade" id="grade"></div>
+        <p class="vazio" id="vazio" hidden>Nenhum produto encontrado. Chama no Direct que a gente procura pra você! 😉</p>
+      </div>
+    </section>
+
+    <!-- INSTAGRAM -->
+    <section class="secao insta" id="instagram">
+      <div class="wrap">
+        <div class="insta-card revelar">
+          <div class="insta-txt">
+            <span class="pill">Site + Instagram conectados</span>
+            <h2>Viu no Insta? Tá aqui.</h2>
+            <p>Cada post do <b>@<span data-loja="instagram">cellphones.sp</span></b> tem o produto correspondente aqui no site, com o mesmo preço e estoque. Toque num post para ver os detalhes ou peça direto pelo Direct.</p>
+            <a href="#" class="btn btn-prim" data-link="instagram">Abrir Instagram</a>
+          </div>
+          <div class="insta-grade" id="instaGrade"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMO COMPRAR -->
+    <section class="secao" id="como-comprar">
+      <div class="wrap">
+        <div class="secao-cab revelar"><div><h2>Como comprar</h2><p>Simples, rápido e com atendimento humano.</p></div></div>
+        <div class="passos">
+          <div class="passo revelar"><span>1</span><h3>Escolha</h3><p>Adicione os produtos ao carrinho aqui no site ou salve o post no Instagram.</p></div>
+          <div class="passo revelar"><span>2</span><h3>Envie o pedido</h3><p>Finalize pelo WhatsApp ou Direct — o pedido vai pronto, com itens e total.</p></div>
+          <div class="passo revelar"><span>3</span><h3>Receba</h3><p>Pagamento por Pix, cartão em até <span data-loja="parcelas">12</span>x e envio rápido com rastreio.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="wrap rodape-in">
+      <div>
+        <a href="#" class="logo"><span class="logo-dot"></span><span data-loja="nome">Cellphones SP</span></a>
+        <p class="mudo">Imagens meramente ilustrativas. Preços e estoque sujeitos a alteração.<br>Marcas citadas pertencem aos respectivos fabricantes.</p>
+      </div>
+      <div class="rodape-links">
+        <a href="#" data-link="instagram">Instagram</a>
+        <a href="#" data-link="whatsapp">WhatsApp</a>
+        <a href="#catalogo">Catálogo</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- botão flutuante -->
+  <a href="#" class="flutuante" data-link="whatsapp" aria-label="Falar no WhatsApp">
+    <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.8 7L4 20l1.1-4A8 8 0 1 1 20 12Z"/><path d="M9 9.5c.5 2.5 2.5 4.5 5 5l1.2-1.2 1.8.8-.5 1.6c-4 .5-8.3-3.8-7.8-7.8l1.6-.5.8 1.8z" fill="currentColor" stroke="none"/></svg>
+  </a>
+
+  <!-- MODAL PRODUTO -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-fundo" data-fechar></div>
+    <div class="modal-caixa" role="dialog" aria-modal="true" aria-labelledby="mNome">
+      <button class="btn-icone fechar" data-fechar aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <div class="modal-grid">
+        <div class="modal-arte" id="mArte"></div>
+        <div class="modal-info">
+          <span class="mudo" id="mMarca"></span>
+          <h2 id="mNome"></h2>
+          <p id="mDesc"></p>
+          <ul class="specs" id="mSpecs"></ul>
+          <div class="preco-bloco" id="mPreco"></div>
+          <div class="estoque" id="mEstoque"></div>
+          <div class="modal-ctas">
+            <button class="btn btn-prim" id="mAdd">Adicionar ao carrinho</button>
+            <button class="btn btn-sec" id="mDirect">Pedir no Direct</button>
+          </div>
+
+          <details class="kit" id="kitInsta">
+            <summary>
+              <svg viewBox="0 0 24 24" class="ig"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+              Kit Instagram (para a loja)
+            </summary>
+            <p class="mudo">Gere a arte e a legenda deste produto para postar — tudo sai com os dados do site.</p>
+            <div class="kit-acoes">
+              <select id="kFormato" aria-label="Formato">
+                <option value="feed">Post feed 4:5</option>
+                <option value="story">Story 9:16</option>
+              </select>
+              <button class="btn btn-mini" id="kPost">Baixar arte</button>
+              <button class="btn btn-mini" id="kLegenda">Copiar legenda</button>
+              <button class="btn btn-mini" id="kLink">Copiar link do produto</button>
+            </div>
+            <div class="kit-gemini">
+              <b>Imagem com Gemini</b>
+              <p class="mudo">Copie o prompt e cole no Gemini para gerar uma foto ilustrativa. Depois salve em <code>imagens/<span id="kId"></span>.png</code> e preencha o campo <code>imagem</code> em <code>produtos.js</code>.</p>
+              <div class="kit-acoes">
+                <button class="btn btn-mini" id="kPrompt">Copiar prompt</button>
+                <a class="btn btn-mini" href="https://gemini.google.com/app" target="_blank" rel="noopener">Abrir Gemini ↗</a>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARRINHO -->
+  <aside class="gaveta" id="gaveta" hidden>
+    <div class="modal-fundo" data-fechar-gaveta></div>
+    <div class="gaveta-caixa">
+      <div class="gaveta-cab">
+        <h3>Seu carrinho</h3>
+        <button class="btn-icone" data-fechar-gaveta aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+      <div class="gaveta-itens" id="itens"></div>
+      <div class="gaveta-rodape">
+        <div class="total"><span>Total</span><b id="total">R$ 0,00</b></div>
+        <p class="mudo" id="parcelado"></p>
+        <button class="btn btn-prim btn-cheio" id="finalizarWhats">Finalizar no WhatsApp</button>
+        <button class="btn btn-sec btn-cheio" id="finalizarDirect">Enviar pedido no Direct</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="aviso" id="aviso" role="status"></div>
+
+  <script src="produtos.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
