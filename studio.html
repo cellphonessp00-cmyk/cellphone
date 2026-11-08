@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Studio Black Friday — Cellphones SP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .st-topo { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 18px 0; }
+    .st-topo h1 { font-size: 1.3rem; letter-spacing: -.02em; }
+    .st-topo h1 b { color: #f5c518; }
+    .st-topo .acoes { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+    .guia { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 8px 0 22px; }
+    .guia div { padding: 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--linha); font-size: .86rem; color: var(--mudo); }
+    .guia b { display: block; color: var(--txt); margin-bottom: 2px; }
+    .progresso { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: .9rem; color: var(--mudo); }
+    .barra { flex: 1; height: 8px; border-radius: 99px; background: var(--card2); overflow: hidden; }
+    .barra i { display: block; height: 100%; background: linear-gradient(90deg, #f5c518, #ff8a00); transition: width .4s; }
+    .dias { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 12px; scrollbar-width: thin; }
+    .dia {
+      flex: none; min-width: 78px; padding: 10px 8px; border-radius: 14px; background: var(--card); border: 1px solid var(--linha);
+      text-align: center; font-size: .8rem; color: var(--mudo); transition: .2s;
+    }
+    .dia b { display: block; font-size: 1.05rem; color: var(--txt); }
+    .dia.hoje { border-color: rgba(245, 197, 24, .6); }
+    .dia.bf { background: #000; border-color: #f5c518; }
+    .dia.bf b { color: #f5c518; }
+    .dia.ativo { background: #f5c518; border-color: #f5c518; color: #000; }
+    .dia.ativo b { color: #000; }
+    .dia .pontos { display: flex; gap: 4px; justify-content: center; margin-top: 6px; }
+    .dia .pontos i { width: 7px; height: 7px; border-radius: 50%; background: #3a3d4c; }
+    .dia .pontos i.ok { background: var(--ok); }
+    .dia.ativo .pontos i { background: rgba(0, 0, 0, .25); } .dia.ativo .pontos i.ok { background: #065f46; }
+    .posts { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
+    .post { border-radius: 22px; background: var(--card); border: 1px solid var(--linha); overflow: hidden; display: flex; flex-direction: column; }
+    .post.feito { border-color: rgba(52, 211, 153, .5); }
+    .post-cab { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--linha); }
+    .post-cab b { font-size: 1.05rem; }
+    .post-cab label { display: flex; align-items: center; gap: 8px; font-size: .88rem; cursor: pointer; }
+    .post-cab input { width: 18px; height: 18px; accent-color: var(--ok); }
+    .post-corpo { display: grid; grid-template-columns: 220px 1fr; gap: 14px; padding: 16px; }
+    .previa { aspect-ratio: 4/5; border-radius: 12px; background: #000; display: grid; place-items: center; overflow: hidden; color: var(--mudo); font-size: .8rem; }
+    .previa img { width: 100%; height: 100%; object-fit: cover; }
+    .post h3 { font-size: 1.05rem; line-height: 1.25; }
+    .post .preco { font-size: 1.15rem; }
+    .post textarea {
+      width: 100%; min-height: 150px; margin-top: 8px; resize: vertical; padding: 10px; border-radius: 12px; font: inherit; font-size: .8rem;
+      background: var(--bg2); color: var(--txt); border: 1px solid var(--linha);
+    }
+    .post-acoes { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 16px; }
+    .post-acoes .btn-mini { flex: 1 1 auto; text-align: center; cursor: pointer; }
+    .btn-ouro { background: #f5c518; color: #000; border-color: #f5c518; font-weight: 700; }
+    .gemini-box { margin: 0 16px 16px; padding: 12px; border-radius: 14px; border: 1px dashed rgba(245, 197, 24, .35); font-size: .82rem; color: var(--mudo); }
+    .gemini-box b { color: var(--txt); }
+    .gemini-box .kit-acoes { margin-top: 8px; }
+    .com-foto { color: var(--ok); font-weight: 600; }
+    @media (max-width: 1000px) { .posts { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) {
+      .guia { grid-template-columns: 1fr 1fr; }
+      .post-corpo { grid-template-columns: 1fr; }
+      .previa { max-width: 320px; width: 100%; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="faixa-bf"><span><b>STUDIO BLACK FRIDAY</b> · uso interno da loja — 2 posts por dia</span></div>
+  <div class="wrap">
+    <header class="st-topo">
+      <a href="./" class="logo"><span class="logo-dot"></span><span data-loja="nome">Cellphones SP</span></a>
+      <h1>Studio <b>Black Friday</b></h1>
+      <div class="acoes">
+        <a class="btn btn-mini" href="./">Ver site</a>
+        <a class="btn btn-mini" data-link="instagram" href="#">Abrir Instagram ↗</a>
+        <a class="btn btn-mini" href="https://gemini.google.com/app" target="_blank" rel="noopener">Abrir Gemini ↗</a>
+      </div>
+    </header>
+
+    <div class="guia">
+      <div><b>1. Foto (opcional)</b>Copie o prompt, gere no Gemini (Nano Banana) e envie a foto em "Usar foto do Gemini".</div>
+      <div><b>2. Baixe a arte</b>Post 4:5 para o feed ou 9:16 para o Story, já com preço e selo Black Friday.</div>
+      <div><b>3. Poste</b>Copie a legenda e publique no horário — ou agende tudo no Meta Business Suite.</div>
+      <div><b>4. Marque</b>"Postado" — o progresso fica salvo neste aparelho.</div>
+    </div>
+
+    <div class="progresso"><span id="progTxt">0 de 0 postados</span><div class="barra"><i id="progBarra" style="width:0"></i></div></div>
+    <div class="dias" id="dias"></div>
+    <div class="posts" id="posts"></div>
+    <p class="mudo" style="margin:24px 0 60px">Os posts usam os preços, descontos e estoque de <code>produtos.js</code>. Entram na campanha os produtos com preço "de" (desconto) e em estoque. Mudou algo? Atualize o arquivo e as artes mudam juntas.</p>
+  </div>
+  <div class="aviso" id="aviso" role="status"></div>
+
+  <script src="produtos.js"></script>
+  <script src="app.js"></script>
+  <script src="studio.js"></script>
+</body>
+</html>

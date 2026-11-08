@@ -3,6 +3,13 @@
 Site no ar: https://cellphonessp00-cmyk.github.io/cellphone/
 Para atualizar: edite os arquivos → GitHub Desktop → *Commit to main* → *Push origin*.
 
+## Black Friday — Studio de posts
+Abra **https://cellphonessp00-cmyk.github.io/cellphone/studio.html** (funciona no celular).
+- Calendário de 09/11 a 30/11 com **2 posts por dia** (11h e 19h), alternando celulares e periféricos com desconto.
+- Cada post: arte 4:5 e story 9:16 com selo Black Friday, legenda pronta (muda conforme a data: "Esquenta", "Faltam X dias", "É hoje!", "Estendida"), prompt para o Gemini/Nano Banana e botão para usar a foto gerada.
+- Marque "Postado" para acompanhar o progresso.
+- Configuração (datas, horários, liga/desliga) em `produtos.js` → `LOJA.blackFriday`. Os descontos vêm do campo `precoAntigo` de cada produto.
+
 ## Arquivos
 | Arquivo | Para que serve |
 |---|---|

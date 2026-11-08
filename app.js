@@ -146,7 +146,7 @@ function midia(p) {
 /* ---------------------------------------------------------------------
    ESTADO
    --------------------------------------------------------------------- */
-const estado = { categoria: "todos", marca: null, busca: "", ordem: "relevancia", soDisp: false };
+const estado = { categoria: "todos", marca: null, busca: "", ordem: "relevancia", soDisp: false, oferta: false };
 let carrinho = {};
 try { carrinho = JSON.parse(localStorage.getItem("carrinho") || "{}") || {}; } catch { carrinho = {}; }
 const salvar = () => { try { localStorage.setItem("carrinho", JSON.stringify(carrinho)); } catch { } };
@@ -190,6 +190,7 @@ function filtrar() {
     if (estado.categoria !== "todos" && p.categoria !== estado.categoria) return false;
     if (estado.marca && p.marca !== estado.marca) return false;
     if (estado.soDisp && p.estoque <= 0) return false;
+    if (estado.oferta && (!desconto(p) || p.estoque <= 0)) return false;
     if (q) {
       const alvo = [p.nome, p.marca, CATEGORIAS[p.categoria], p.corNome, ...p.specs].join(" ").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
       return q.split(/\s+/).every(t => alvo.includes(t));
@@ -208,7 +209,9 @@ function renderChips() {
   const cont = { todos: PRODUTOS.length };
   PRODUTOS.forEach(p => cont[p.categoria] = (cont[p.categoria] || 0) + 1);
   const chips = [["todos", "Todos"], ...Object.entries(CATEGORIAS).filter(([k]) => cont[k])];
-  let html = chips.map(([k, n]) => `<button class="chip ${estado.categoria === k && !estado.marca ? "ativo" : ""}" data-cat="${k}">${n}<small>${cont[k]}</small></button>`).join("");
+  const nOfertas = PRODUTOS.filter(p => desconto(p) && p.estoque > 0).length;
+  let html = bfAtivo() ? `<button class="chip chip-bf ${estado.oferta ? "ativo" : ""}" data-oferta>🔥 Black Friday<small>${nOfertas}</small></button>` : "";
+  html += chips.map(([k, n]) => `<button class="chip ${estado.categoria === k && !estado.marca && !estado.oferta ? "ativo" : ""}" data-cat="${k}">${n}<small>${cont[k]}</small></button>`).join("");
   html += ["Apple", "Samsung"].map(m => `<button class="chip ${estado.marca === m ? "ativo" : ""}" data-marca="${m}">${m === "Apple" ? "iPhone" : "Galaxy"}</button>`).join("");
   $("#chips").innerHTML = html;
 }
@@ -319,27 +322,34 @@ function fecharGaveta() { $("#gaveta").hidden = true; if ($("#modal").hidden) do
 /* ---------------------------------------------------------------------
    KIT INSTAGRAM: legenda, prompt Gemini, arte para post/story
    --------------------------------------------------------------------- */
-function legenda(p) {
+function legenda(p, chamada) {
   const off = desconto(p);
   const tagMarca = p.marca === "Apple" ? "#iphone #apple" : p.marca === "Samsung" ? "#samsung #galaxy" : "#" + CATEGORIAS[p.categoria].toLowerCase().replace(/\s/g, "");
-  return `✨ ${p.nome.toUpperCase()} ✨\n\n${p.descricao}\n\n` +
+  const tagBF = bfAtivo() ? " #blackfriday #blackfriday2026 #blackfridaybrasil" : "";
+  if (!chamada && bfAtivo()) chamada = `🖤 BLACK FRIDAY ${LOJA.nome.toUpperCase()} 🖤`;
+  return (chamada ? chamada + "\n\n" : "") + `✨ ${p.nome.toUpperCase()} ✨\n\n${p.descricao}\n\n` +
     p.specs.map(s => `✅ ${s}`).join("\n") + `\n🎨 Cor: ${p.corNome}\n\n` +
     (p.precoAntigo ? `De ${fmt(p.precoAntigo)} por ` : "💰 ") + `${fmt(p.preco)}${off ? ` (-${off}%)` : ""}\n` +
     `💳 ou ${LOJA.parcelas}x de ${fmt(p.preco / LOJA.parcelas)} sem juros\n` +
     (p.estoque <= 0 ? "⏳ Esgotado — chama no Direct pra reservar!\n" : p.estoque <= 3 ? `🔥 Últimas ${p.estoque} unidades!\n` : "📦 Pronta entrega\n") +
-    `\n📩 Chama no Direct ou compre pelo link da bio\n🔗 ${linkProduto(p)}\n\n*Imagem ilustrativa.\n\n${tagMarca} ${LOJA.hashtags}`;
+    `\n📩 Chama no Direct ou compre pelo link da bio\n🔗 ${linkProduto(p)}\n\n*Imagem ilustrativa. Ofertas válidas enquanto durar o estoque.\n\n${tagMarca} ${LOJA.hashtags}${tagBF}`;
 }
-function promptGemini(p) {
+function promptGemini(p, bf = bfAtivo()) {
   const cel = p.categoria === "celulares";
+  const fundo = bf
+    ? "Cenário de Black Friday: fundo preto profundo com detalhes e reflexos dourados, partículas de luz douradas desfocadas e um brilho suave atrás do produto"
+    : `Fundo escuro em degradê com um brilho suave na cor ${p.corNome}`;
   return `Crie uma fotografia de produto ilustrativa, estilo estúdio premium, de um ${p.nome} na cor ${p.corNome}` +
     (cel ? ", mostrando a frente com a tela acesa e a traseira com o módulo de câmeras lado a lado" : ", em ângulo de três quartos") +
-    `. Fundo escuro em degradê com um brilho suave na cor ${p.corNome}, iluminação de recorte, reflexo sutil no chão, nitidez alta, aparência realista. ` +
+    `. ${fundo}, iluminação de recorte, reflexo sutil no chão, nitidez alta, aparência realista e fiel ao design oficial do produto. ` +
     `Sem texto, sem marcas d'água, sem pessoas. Composição centralizada com espaço livre acima e abaixo do produto, formato vertical 4:5 (1080x1350) para post de Instagram.`;
 }
 function carregarImg(src) {
   return new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = src; });
 }
-async function gerarArte(p, formato) {
+const bfAtivo = () => !!(LOJA.blackFriday && LOJA.blackFriday.ativo);
+async function gerarArte(p, formato, opc = {}) {
+  const bf = opc.blackFriday ?? bfAtivo();
   const W = 1080, H = formato === "story" ? 1920 : 1350;
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const x = cv.getContext("2d");
@@ -347,16 +357,17 @@ async function gerarArte(p, formato) {
 
   // fundo
   const g = x.createLinearGradient(0, 0, W, H);
-  g.addColorStop(0, "#0b0d16"); g.addColorStop(1, shade(p.cor, -110));
+  g.addColorStop(0, bf ? "#000000" : "#0b0d16"); g.addColorStop(1, shade(p.cor, bf ? -135 : -110));
   x.fillStyle = g; x.fillRect(0, 0, W, H);
   const rg = x.createRadialGradient(W / 2, H * .4, 20, W / 2, H * .4, W * .7);
-  rg.addColorStop(0, p.cor + "66"); rg.addColorStop(1, "transparent");
+  rg.addColorStop(0, (bf ? "#f5c518" : p.cor) + (bf ? "33" : "66")); rg.addColorStop(1, "transparent");
   x.fillStyle = rg; x.fillRect(0, 0, W, H);
+  if (bf) { x.fillStyle = "#f5c518"; x.fillRect(0, 0, W, 12); }
 
   // produto (foto do Gemini se houver; senão ilustração)
   const tam = formato === "story" ? 940 : 690, topo = formato === "story" ? 300 : 150;
   let img;
-  try { img = await carregarImg(p.imagem || "data:image/svg+xml;charset=utf-8," + encodeURIComponent(arte(p, tam))); }
+  try { img = await carregarImg(opc.imagem || p.imagem || "data:image/svg+xml;charset=utf-8," + encodeURIComponent(arte(p, tam))); }
   catch { img = await carregarImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(arte(p, tam))); }
   const esc = Math.min(tam / img.width, tam / img.height);
   x.drawImage(img, (W - img.width * esc) / 2, topo + (tam - img.height * esc) / 2, img.width * esc, img.height * esc);
@@ -365,12 +376,12 @@ async function gerarArte(p, formato) {
   x.fillStyle = "#fff"; x.font = fonte(800, 44); x.textBaseline = "top";
   x.fillText(LOJA.nome, 70, 70);
   const off = desconto(p);
-  const selo = p.estoque <= 0 ? "ESGOTADO" : p.novo ? "LANÇAMENTO" : off ? `-${off}% OFF` : "PRONTA ENTREGA";
+  const selo = p.estoque <= 0 ? "ESGOTADO" : bf ? `BLACK FRIDAY${off ? ` -${off}%` : ""}` : p.novo ? "LANÇAMENTO" : off ? `-${off}% OFF` : "PRONTA ENTREGA";
   x.font = fonte(800, 30);
   const sw = x.measureText(selo).width + 48;
-  x.fillStyle = p.estoque <= 0 ? "#3a3d4c" : off && !p.novo ? "#ff3d8b" : "#22d3ee";
+  x.fillStyle = p.estoque <= 0 ? "#3a3d4c" : bf ? "#f5c518" : off && !p.novo ? "#ff3d8b" : "#22d3ee";
   x.beginPath(); x.roundRect(W - 70 - sw, 64, sw, 60, 30); x.fill();
-  x.fillStyle = p.estoque <= 0 || (off && !p.novo) ? "#fff" : "#05222a";
+  x.fillStyle = p.estoque <= 0 || (!bf && off && !p.novo) ? "#fff" : bf ? "#000" : "#05222a";
   x.fillText(selo, W - 70 - sw + 24, 79);
 
   // textos
@@ -399,9 +410,10 @@ async function gerarArte(p, formato) {
   x.fillStyle = "#8a90a6"; x.font = fonte(500, 22);
   x.textAlign = "right"; x.fillText("Imagem ilustrativa", W - 70, H - 64); x.textAlign = "left";
 
+  if (opc.retornar) return cv.toDataURL("image/jpeg", .92);
   try {
     const a = document.createElement("a");
-    a.download = `${p.id}-${formato}.png`;
+    a.download = opc.nomeArquivo || `${p.id}-${formato}.png`;
     a.href = cv.toDataURL("image/png");
     a.click();
     aviso("Arte baixada! Pronta para postar 📸");
@@ -438,8 +450,23 @@ function irParaCatalogo() { $("#catalogo").scrollIntoView({ behavior: "smooth" }
 /* ---------------------------------------------------------------------
    EVENTOS
    --------------------------------------------------------------------- */
+function renderFaixaBF() {
+  const f = $("#faixaBF");
+  if (!f || !bfAtivo()) return;
+  const max = Math.max(...PRODUTOS.filter(p => p.estoque > 0).map(desconto));
+  $("#faixaBFtxt").innerHTML = `<b>BLACK FRIDAY</b> · até <b>${max}% OFF</b> em iPhone, Galaxy e periféricos`;
+  f.hidden = false;
+}
+
+function iniciarLoja() {
 document.addEventListener("click", e => {
   const t = e.target;
+  const oferta = t.closest("[data-oferta]");
+  if (oferta) {
+    e.preventDefault();
+    estado.oferta = !estado.oferta || oferta.id === "faixaBF"; estado.categoria = "todos"; estado.marca = null;
+    renderChips(); renderGrade(); if (oferta.id === "faixaBF") irParaCatalogo(); return;
+  }
   const add = t.closest("[data-add]");
   if (add) { e.stopPropagation(); return adicionar(add.dataset.add); }
   const mais = t.closest("[data-mais]"); if (mais) return alterar(mais.dataset.mais, 1);
@@ -448,12 +475,12 @@ document.addEventListener("click", e => {
   if (t.closest("[data-fechar]")) return fecharProduto();
   if (t.closest("[data-fechar-gaveta]")) return fecharGaveta();
   const cat = t.closest("[data-cat]");
-  if (cat) { estado.categoria = cat.dataset.cat; estado.marca = null; renderChips(); return renderGrade(); }
+  if (cat) { estado.categoria = cat.dataset.cat; estado.marca = null; estado.oferta = false; renderChips(); return renderGrade(); }
   const marca = t.closest("[data-marca]");
-  if (marca) { estado.marca = estado.marca === marca.dataset.marca ? null : marca.dataset.marca; estado.categoria = "todos"; renderChips(); return renderGrade(); }
+  if (marca) { estado.marca = estado.marca === marca.dataset.marca ? null : marca.dataset.marca; estado.categoria = "todos"; estado.oferta = false; renderChips(); return renderGrade(); }
   const rapido = t.closest("[data-filtro-rapido]");
   if (rapido) {
-    const v = rapido.dataset.filtroRapido;
+    const v = rapido.dataset.filtroRapido; estado.oferta = false;
     if (v === "Apple" || v === "Samsung") { estado.marca = v; estado.categoria = "todos"; }
     else { estado.categoria = v; estado.marca = null; }
     renderChips(); renderGrade(); return irParaCatalogo();
@@ -507,6 +534,7 @@ const obs = "IntersectionObserver" in window ? new IntersectionObserver(es => es
    INÍCIO
    --------------------------------------------------------------------- */
 aplicarLoja();
+renderFaixaBF();
 renderHero();
 renderDestaques();
 renderChips();
@@ -515,3 +543,5 @@ renderInsta();
 renderCarrinho();
 $$(".revelar").forEach(el => obs ? obs.observe(el) : el.classList.add("visivel"));
 lerHash();
+}
+if (document.getElementById("grade")) iniciarLoja();

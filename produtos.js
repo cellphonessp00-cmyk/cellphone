@@ -4,12 +4,22 @@
 const LOJA = {
   nome: "Cellphones SP",
   slogan: "iPhone, Samsung e periféricos em São Paulo — entrega rápida e garantia",
-  instagram: "cellphones.sp",        // seu @ do Instagram, sem o arroba (ajuste quando criar a conta)
+  instagram: "cellphonessp00",       // seu @ do Instagram, sem o arroba
   whatsapp: "5511999999999",         // DDI + DDD + número, só dígitos
   site: "https://cellphonessp00-cmyk.github.io/cellphone", // endereço do site (vai no link da bio / legendas)
   moeda: "BRL",
   parcelas: 12,                      // parcelas sem juros exibidas no site e nas legendas
-  hashtags: "#cellphonessp #saopaulo #sp #tecnologia #smartphone #iphone #samsung #galaxy #setupgamer #perifericos #gamer #ofertas"
+  hashtags: "#cellphonessp #saopaulo #sp #tecnologia #smartphone #iphone #samsung #galaxy #setupgamer #perifericos #gamer #ofertas",
+
+  // Campanha Black Friday — entram nos posts os produtos COM "precoAntigo" (desconto) e em estoque.
+  // ativo: false desliga a faixa no site e o tema preto/dourado das artes.
+  blackFriday: {
+    ativo: true,
+    inicio: "2026-11-09",            // primeiro dia de posts
+    dia: "2026-11-27",               // o dia da Black Friday
+    fim: "2026-11-30",               // último dia de posts (Cyber Monday)
+    horarios: ["11:00", "19:00"]     // 2 posts por dia
+  }
 };
 
 // =====================================================================
