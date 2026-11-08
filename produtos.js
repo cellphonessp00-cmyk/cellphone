@@ -6,7 +6,7 @@ const LOJA = {
   slogan: "iPhone, Samsung e periféricos em São Paulo — entrega rápida e garantia",
   instagram: "cellphones.sp",        // seu @ do Instagram, sem o arroba (ajuste quando criar a conta)
   whatsapp: "5511999999999",         // DDI + DDD + número, só dígitos
-  site: "https://www.seusite.com.br", // endereço do site (vai no link da bio / legendas)
+  site: "https://cellphonessp00-cmyk.github.io/cellphone", // endereço do site (vai no link da bio / legendas)
   moeda: "BRL",
   parcelas: 12,                      // parcelas sem juros exibidas no site e nas legendas
   hashtags: "#cellphonessp #saopaulo #sp #tecnologia #smartphone #iphone #samsung #galaxy #setupgamer #perifericos #gamer #ofertas"

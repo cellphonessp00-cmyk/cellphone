@@ -1,4 +1,7 @@
-# Site da loja — Smartphones e Periféricos (integrado ao Instagram)
+# Cellphones SP — Smartphones e Periféricos (integrado ao Instagram)
+
+Site no ar: https://cellphonessp00-cmyk.github.io/cellphone/
+Para atualizar: edite os arquivos → GitHub Desktop → *Commit to main* → *Push origin*.
 
 ## Arquivos
 | Arquivo | Para que serve |
