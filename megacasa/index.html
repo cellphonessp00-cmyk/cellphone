@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mega Casa SP — Eletrodomésticos e Motos Elétricas</title>
+<meta name="description" content="Eletrodomésticos, motos elétricas, bikes e patinetes com frete grátis, Pix com desconto e parcelamento sem juros.">
+<meta name="theme-color" content="#0b2d6b">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="topo-aviso">
+  <span>🚚 Frete grátis acima de <b id="avisoFrete">R$ 299</b></span>
+  <span>💠 <b id="avisoPix">5% OFF</b> no Pix</span>
+  <span>💳 Até <b id="avisoParc">10x</b> sem juros</span>
+</div>
+
+<header class="cab">
+  <div class="cab-linha">
+    <button class="btn-icone so-mobile" id="abrirMenu" aria-label="Categorias">☰</button>
+    <a href="#" class="logo" id="logo"><span class="logo-marca">Mega</span><span class="logo-casa">Casa</span><small>SP</small></a>
+    <form class="busca" id="busca" role="search" autocomplete="off">
+      <input id="q" type="search" placeholder="Buscar air fryer, moto elétrica, geladeira..." aria-label="Buscar produtos">
+      <button aria-label="Buscar">🔍</button>
+      <ul class="sugestoes" id="sugestoes" hidden></ul>
+    </form>
+    <button class="cep-btn so-desktop" id="cepTopo">📍 <span id="cepTopoTxt">Informe seu CEP</span></button>
+    <button class="btn-icone" id="abrirFavs" aria-label="Favoritos">♡<span class="bolha" id="qtdFavs" hidden>0</span></button>
+    <button class="btn-icone" id="abrirCarrinho" aria-label="Carrinho">🛒<span class="bolha" id="qtdCarrinho" hidden>0</span></button>
+  </div>
+  <nav class="menu-cats" id="menuCats"></nav>
+</header>
+
+<main>
+  <section class="hero" id="hero" aria-roledescription="carrossel">
+    <div class="hero-trilho" id="heroTrilho"></div>
+    <button class="hero-seta esq" data-hero="-1" aria-label="Anterior">‹</button>
+    <button class="hero-seta dir" data-hero="1" aria-label="Próximo">›</button>
+    <div class="hero-dots" id="heroDots"></div>
+  </section>
+
+  <section class="cont vantagens">
+    <div><b>💠 Pix</b><span>5% de desconto</span></div>
+    <div><b>💳 Cartão</b><span>até 10x sem juros</span></div>
+    <div><b>🚚 Frete grátis</b><span>acima de R$ 299</span></div>
+    <div><b>⚡ Entrega rápida</b><span>em SP capital</span></div>
+  </section>
+
+  <section class="cont">
+    <div class="circulos" id="circulos"></div>
+  </section>
+
+  <section class="cont bloco">
+    <div class="bloco-tit">
+      <h2>⚡ Ofertas do dia</h2>
+      <div class="cronometro">Termina em <b id="cronometro">--:--:--</b></div>
+      <a href="#catalogo" class="ver-tudo" data-ordem="desconto">Ver todas</a>
+    </div>
+    <div class="carrossel" id="ofertasDia"></div>
+  </section>
+
+  <section class="cont bloco faixa-moto">
+    <div class="bloco-tit">
+      <h2>🛵 Mobilidade elétrica em alta</h2>
+      <a href="#catalogo" class="ver-tudo" data-cat="motos">Ver motos</a>
+    </div>
+    <div class="carrossel" id="mobilidade"></div>
+  </section>
+
+  <section class="cont bloco">
+    <div class="bloco-tit"><h2>🔥 Mais vendidos</h2></div>
+    <div class="carrossel" id="maisVendidos"></div>
+  </section>
+
+  <section class="cont catalogo" id="catalogo">
+    <aside class="filtros" id="filtros">
+      <div class="filtros-cab so-mobile"><b>Filtrar</b><button class="btn-icone" id="fecharFiltros" aria-label="Fechar">✕</button></div>
+      <h3>Categorias</h3>
+      <ul id="fCats" class="f-lista"></ul>
+      <h3>Marca</h3>
+      <ul id="fMarcas" class="f-lista"></ul>
+      <h3>Preço</h3>
+      <div class="f-preco">
+        <input type="number" id="pMin" placeholder="Mín" min="0" inputmode="numeric">
+        <span>–</span>
+        <input type="number" id="pMax" placeholder="Máx" min="0" inputmode="numeric">
+      </div>
+      <h3>Entrega</h3>
+      <label class="f-check"><input type="checkbox" id="fFrete"> Frete grátis</label>
+      <label class="f-check"><input type="checkbox" id="fRapida"> Entrega rápida</label>
+      <label class="f-check"><input type="checkbox" id="fEstoque"> Somente disponíveis</label>
+      <h3>Avaliação</h3>
+      <label class="f-check"><input type="checkbox" id="fNota"> ★ 4,7 ou mais</label>
+      <button class="btn btn-sec largo" id="limparFiltros">Limpar filtros</button>
+    </aside>
+
+    <div class="resultado">
+      <div class="res-barra">
+        <div><h2 id="resTitulo">Todos os produtos</h2><span id="resQtd" class="muted"></span></div>
+        <div class="res-acoes">
+          <button class="btn btn-sec so-mobile" id="abrirFiltros">⚙ Filtrar</button>
+          <label>Ordenar:
+            <select id="ordem">
+              <option value="relevancia">Mais relevantes</option>
+              <option value="vendidos">Mais vendidos</option>
+              <option value="menor">Menor preço</option>
+              <option value="maior">Maior preço</option>
+              <option value="desconto">Maior desconto</option>
+              <option value="nota">Melhor avaliados</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="ativos" id="ativos"></div>
+      <div class="grade" id="grade"></div>
+      <p class="vazio" id="vazio" hidden>Nenhum produto encontrado. <button class="link" id="vazioLimpar">Limpar filtros</button></p>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <div class="cont rodape-cols">
+    <div>
+      <a href="#" class="logo claro"><span class="logo-marca">Mega</span><span class="logo-casa">Casa</span><small>SP</small></a>
+      <p id="slogan"></p>
+      <p><a id="linkInsta" target="_blank" rel="noopener">📷 Instagram</a> · <a id="linkWhats" target="_blank" rel="noopener">💬 WhatsApp</a></p>
+    </div>
+    <div><h4>Atendimento</h4><p>Seg a sáb, 9h às 19h<br>Troca em até 7 dias<br>Garantia de fábrica</p></div>
+    <div><h4>Pagamento</h4><div class="pagamentos"><span>Pix</span><span>Visa</span><span>Master</span><span>Elo</span><span>Boleto</span></div></div>
+    <div><h4>Segurança</h4><p>🔒 Site protegido<br>Compra pelo WhatsApp com atendente</p></div>
+  </div>
+  <p class="cont legal">Imagens ilustrativas. Preços e estoque sujeitos a alteração. Motos e ciclomotores elétricos: consulte as regras de habilitação e emplacamento do CONTRAN.</p>
+</footer>
+
+<!-- Produto -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-fundo" data-fechar></div>
+  <div class="modal-caixa" role="dialog" aria-modal="true" aria-labelledby="mNome">
+    <button class="btn-icone modal-x" data-fechar aria-label="Fechar">✕</button>
+    <div id="modalCorpo"></div>
+  </div>
+</div>
+
+<!-- Carrinho / favoritos -->
+<div class="gaveta" id="gaveta" hidden>
+  <div class="modal-fundo" data-fechar-gaveta></div>
+  <aside class="gaveta-caixa">
+    <div class="gaveta-cab"><h3 id="gavetaTit">Carrinho</h3><button class="btn-icone" data-fechar-gaveta aria-label="Fechar">✕</button></div>
+    <div class="gaveta-itens" id="gavetaItens"></div>
+    <div class="gaveta-rodape" id="gavetaRodape"></div>
+  </aside>
+</div>
+
+<!-- Menu mobile -->
+<div class="gaveta esq" id="menuMobile" hidden>
+  <div class="modal-fundo" data-fechar-menu></div>
+  <aside class="gaveta-caixa">
+    <div class="gaveta-cab"><h3>Categorias</h3><button class="btn-icone" data-fechar-menu aria-label="Fechar">✕</button></div>
+    <div id="menuMobileLista" class="menu-mobile-lista"></div>
+  </aside>
+</div>
+
+<div class="aviso" id="aviso" role="status" hidden></div>
+
+<script src="produtos.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
