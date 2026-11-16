@@ -29,6 +29,7 @@
     <div>
       <section class="caixa">
         <h2><span class="num">1</span> Identificação</h2>
+        <div id="contaInfo" style="margin-bottom:14px"></div>
         <div class="campos">
           <label class="campo">Nome completo<input name="nome" autocomplete="name" required maxlength="80"></label>
           <label class="campo m3">E-mail<input name="email" type="email" autocomplete="email" required maxlength="120"><small>Enviaremos a confirmação do pedido.</small></label>
@@ -78,7 +79,9 @@
   <p class="cont legal" id="dadosEmpresa"></p>
 </footer>
 
+<div class="aviso" id="aviso" role="status" hidden></div>
 <script src="produtos.js"></script>
+<script src="conta.js"></script>
 <script src="checkout.js"></script>
 </body>
 </html>

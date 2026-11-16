@@ -55,11 +55,15 @@ async function buscarCep(cep) {
 }
 
 /* ---------- valores (prévia; mesma regra do servidor) ---------- */
-function calcular() {
-  const pag = form.pagamento?.value || "pix";
+const r2 = v => Math.round(v * 100 + 1e-7) / 100;
+function calcular(pagForcado) {
+  const pag = pagForcado || form.pagamento?.value || "pix";
   const sub = carrinho.reduce((s, i) => s + i.p.preco * i.qtd, 0);
-  // mesmo arredondamento do servidor: desconto por unidade
-  const desc = pag === "pix" ? sub - carrinho.reduce((s, i) => s + Math.round(i.p.preco * (1 - LOJA.descontoPix / 100) * 100 + 1e-7) / 100 * i.qtd, 0) : 0;
+  // mesmo arredondamento do servidor: desconto por unidade (cadastro primeiro, depois Pix)
+  const fc = 1 - CONTA.desconto() / 100, fp = pag === "pix" ? 1 - LOJA.descontoPix / 100 : 1;
+  const comCad = carrinho.reduce((s, i) => s + r2(i.p.preco * fc) * i.qtd, 0);
+  const pago = carrinho.reduce((s, i) => s + r2(r2(i.p.preco * fc) * fp) * i.qtd, 0);
+  const descCad = sub - comCad, desc = sub - pago;
   const d = form.cep.value.replace(/\D/g, "");
   const n = d.length === 8 ? +d.slice(0, 2) : null;
   const gratis = carrinho.every(i => i.p.freteGratis) || sub >= LOJA.freteGratisAcima;
@@ -67,17 +71,32 @@ function calcular() {
   const frete = n === null ? null : gratis ? 0 : sp ? 19.9 : 39.9;
   const rapida = carrinho.every(i => i.p.entregaRapida);
   const prazo = n === null ? "" : capital && rapida ? "amanhã" : capital ? "em 1 a 2 dias úteis" : gsp ? "em 2 a 3 dias úteis" : sp ? "em 3 a 5 dias úteis" : "em 5 a 10 dias úteis";
-  return { sub, desc, frete, prazo, total: sub - desc + (frete || 0) };
+  return { sub, desc, descCad, descPix: desc - descCad, frete, prazo, total: sub - desc + (frete || 0) };
 }
 
 function opcoesPagamento() {
-  const { sub } = calcular();
-  const pix = sub * (1 - LOJA.descontoPix / 100);
+  const atual = form.pagamento?.value || "pix";
+  const pix = calcular("pix").sub - calcular("pix").desc, outro = calcular("cartao").sub - calcular("cartao").desc;
   $("#opcoesPag").innerHTML = `
-    <label class="opcao"><input type="radio" name="pagamento" value="pix" checked><span>💠</span><div><b>Pix</b><small>${LOJA.descontoPix}% de desconto · aprovação na hora</small></div><span class="valor">${fmt(pix)}</span></label>
-    <label class="opcao"><input type="radio" name="pagamento" value="cartao"><span>💳</span><div><b>Cartão de crédito</b><small>em até ${LOJA.parcelas}x de ${fmt(sub / LOJA.parcelas)} sem juros</small></div><span class="valor">${fmt(sub)}</span></label>
-    <label class="opcao"><input type="radio" name="pagamento" value="boleto"><span>🧾</span><div><b>Boleto bancário</b><small>aprovação em até 3 dias úteis</small></div><span class="valor">${fmt(sub)}</span></label>`;
+    <label class="opcao"><input type="radio" name="pagamento" value="pix" ${atual === "pix" ? "checked" : ""}><span>💠</span><div><b>Pix</b><small>+${LOJA.descontoPix}% de desconto · aprovação na hora</small></div><span class="valor">${fmt(pix)}</span></label>
+    <label class="opcao"><input type="radio" name="pagamento" value="cartao" ${atual === "cartao" ? "checked" : ""}><span>💳</span><div><b>Cartão de crédito</b><small>em até ${LOJA.parcelas}x de ${fmt(outro / LOJA.parcelas)} sem juros</small></div><span class="valor">${fmt(outro)}</span></label>
+    <label class="opcao"><input type="radio" name="pagamento" value="boleto" ${atual === "boleto" ? "checked" : ""}><span>🧾</span><div><b>Boleto bancário</b><small>aprovação em até 3 dias úteis</small></div><span class="valor">${fmt(outro)}</span></label>`;
 }
+
+function infoConta() {
+  const box = $("#contaInfo"), c = CONTA.atual;
+  if (CONTA.logado()) {
+    box.innerHTML = `<div class="beneficio">🎁 Olá, <b>${esc(c.nome)}</b>! Seu desconto de cadastro de <b>${CONTA.desconto()}%</b> foi aplicado. <a href="#" data-sair>Não é você?</a></div>`;
+    if (!form.nome.value) form.nome.value = `${c.nome} ${c.sobrenome}`;
+    if (!form.email.value) form.email.value = c.email;
+    if (!form.telefone.value) form.telefone.value = mascaras.telefone(c.telefone || "");
+  } else if (LOJA.descontoCadastro) {
+    box.innerHTML = `<div class="beneficio">🎁 Clientes cadastrados ganham <b>${LOJA.descontoCadastro}% de desconto</b>.
+      <a href="#" data-abrir-conta="entrar">Entrar</a> ou <a href="#" data-abrir-conta="cadastrar"><b>cadastrar agora</b></a> (leva 30 segundos).</div>`;
+  }
+}
+document.addEventListener("click", e => { if (e.target.closest("[data-sair]")) { e.preventDefault(); CONTA.sair(); } });
+document.addEventListener("conta-mudou", () => { if (carrinho.length) { infoConta(); opcoesPagamento(); resumo(); } });
 
 function resumo() {
   const v = calcular();
@@ -85,7 +104,8 @@ function resumo() {
     <div><h4>${esc(i.p.nome)}</h4><small>${i.qtd} un.${i.volt ? " · " + i.volt : ""}</small></div><b>${fmt(i.p.preco * i.qtd)}</b></div>`).join("");
   $("#resumoValores").innerHTML = `
     <div class="linha"><span>Subtotal (${carrinho.reduce((s, i) => s + i.qtd, 0)} itens)</span><span>${fmt(v.sub)}</span></div>
-    ${v.desc ? `<div class="linha verde"><span>Desconto Pix</span><span>− ${fmt(v.desc)}</span></div>` : ""}
+    ${v.descCad ? `<div class="linha roxo"><span>🎁 Desconto de cadastro</span><span>− ${fmt(v.descCad)}</span></div>` : ""}
+    ${v.descPix ? `<div class="linha verde"><span>Desconto Pix</span><span>− ${fmt(v.descPix)}</span></div>` : ""}
     <div class="linha"><span>Frete</span><span>${v.frete === null ? "informe o CEP" : v.frete ? fmt(v.frete) : "<b style='color:var(--verde)'>Grátis</b>"}</span></div>
     <div class="linha total"><span>Total</span><span>${fmt(v.total)}</span></div>`;
   $("#prazoTxt").textContent = v.prazo ? `🚚 Entrega prevista ${v.prazo} após a confirmação do pagamento.` : "";
@@ -114,7 +134,7 @@ form.addEventListener("submit", async e => {
   const f = Object.fromEntries(new FormData(form));
   try {
     const r = await fetch("api/checkout", {
-      method: "POST", headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json", ...CONTA.auth() },
       body: JSON.stringify({
         itens: carrinho.map(i => ({ id: i.id, quantidade: i.qtd, voltagem: i.volt })),
         cliente: { nome: f.nome, email: f.email, cpf: f.cpf, telefone: f.telefone },
@@ -133,4 +153,4 @@ form.addEventListener("submit", async e => {
 });
 
 if (!carrinho.length) $("#vazio").hidden = false;
-else { form.hidden = false; opcoesPagamento(); resumo(); }
+else { form.hidden = false; infoConta(); opcoesPagamento(); resumo(); }

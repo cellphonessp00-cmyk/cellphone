@@ -46,7 +46,9 @@ Em `produtos.js`, no bloco `LOJA`:
 > Não copie fotos de outras lojas (Casas Bahia, Magalu, Mercado Livre): elas têm direitos autorais e o Google pode
 > rebaixar o site por conteúdo duplicado. Fotos suas, tiradas com o celular num fundo branco, também funcionam muito bem.
 
-Depois de qualquer mudança em `produtos.js`, rode:
+**Atalho:** salve as fotos em `img/` com o nome `<id>.jpg` (capa), `<id>-2.jpg`, `<id>-3.jpg`… A lista de nomes e os prompts do Gemini estão em `lista-imagens.md`. O `gerar_site.py` liga cada foto ao produto sozinho.
+
+Depois de qualquer mudança em `produtos.js` ou nas fotos, rode:
 ```bash
 python gerar_site.py
 ```
@@ -80,11 +82,37 @@ O painel fica em http://localhost:8790/admin/ e a senha local é `admin`.
 | `ADMIN_SENHA` | Senha forte do painel (12+ caracteres) |
 | `SEGREDO_APP` | Uma frase aleatória longa (assina os links dos pedidos) |
 | `SITE_URL` | Endereço do site, ex.: `https://megacasasp.vercel.app` |
+| `PLANILHA_URL` / `PLANILHA_SEGREDO` | Planilhas do Google (ver 4.1) |
 
 5. *Deployments* → **Redeploy**. Faça uma compra de teste com o token `TEST-` e os
    [cartões de teste do Mercado Pago](https://www.mercadopago.com.br/developers/pt/docs/checkout-pro/integration-test/test-cards).
 
 > O site antigo no GitHub Pages (`…github.io/cellphone/megacasa`) não tem servidor, então o checkout não funciona lá. Divulgue só o endereço da Vercel.
+
+## 4.1) Cadastro de clientes (10% OFF) e planilhas do Google
+**Como funciona para o cliente**
+- No topo do site, ele clica em **"Entre ou cadastre-se"** e informa nome, sobrenome, e-mail, telefone e senha.
+- Logado, ganha **10% de desconto em todas as compras**, que soma com os 5% do Pix. O percentual fica em `LOJA.descontoCadastro`.
+- O desconto é aplicado pelo servidor, então não dá para "forjar". No checkout, nome, e-mail e telefone já vêm preenchidos; ele só informa CPF e endereço.
+
+**As 2 planilhas** ficam no seu Google Drive e se atualizam sozinhas:
+
+| Planilha | O que guarda |
+|---|---|
+| **Mega Casa SP - Clientes** | Data do cadastro, nome, sobrenome, e-mail, telefone, aceita ofertas, último acesso, nº de pedidos e total comprado |
+| **Mega Casa SP - Pedidos** | Nº do pedido, data, status (atualiza quando paga, envia, entrega), cliente, CPF, **endereço de entrega completo**, itens, forma de pagamento, descontos, frete, total e rastreio |
+
+A senha do cliente **nunca** vai para a planilha: ela fica guardada criptografada (PBKDF2) no banco do site.
+
+**Instalação (10 minutos, uma vez só)**
+1. Entre em **script.google.com** com a conta Google da empresa → *Novo projeto*.
+2. Apague o que estiver lá e cole todo o conteúdo de `planilhas/Codigo.gs`. Salve.
+3. No menu de funções, escolha **configurar** → *Executar* → autorize. As duas planilhas são criadas no seu Drive.
+4. Abra *Execuções* (ou *Registro*) e copie o valor de **PLANILHA_SEGREDO**.
+5. **Implantar → Nova implantação → App da Web**. Em "Executar como", escolha *Eu*; em "Quem pode acessar", escolha *Qualquer pessoa*. Copie a URL que termina em `/exec`.
+6. Na Vercel, crie as variáveis `PLANILHA_URL` (a URL do passo 5) e `PLANILHA_SEGREDO` (o valor do passo 4) e faça *Redeploy*.
+
+> Se um dia você mudar o código do script, use *Implantar → Gerenciar implantações → Editar → Nova versão* para manter a mesma URL.
 
 ## 5) Aparecer no Google
 1. **Domínio próprio (recomendado):** registre `megacasasp.com.br` no **registro.br** (~R$ 40/ano). Na Vercel: *Settings → Domains → Add*. Depois troque `site` em `produtos.js` e `SITE_URL`, e rode `python gerar_site.py`.

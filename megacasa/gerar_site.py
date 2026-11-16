@@ -19,7 +19,34 @@ RAIZ = Path(__file__).resolve().parent
 sys.path.insert(0, str(RAIZ / "api"))
 from _loja import _extrair  # noqa: E402
 
-TEXTO = (RAIZ / "produtos.js").read_text(encoding="utf-8")
+def vincular_imagens():
+    """Liga sozinho as fotos colocadas em img/: img/<id>.jpg (capa), img/<id>-2.jpg, img/<id>-3.jpg..."""
+    arq = RAIZ / "produtos.js"
+    t = arq.read_text(encoding="utf-8")
+    pasta = RAIZ / "img"
+    if not pasta.exists():
+        return t
+    novos = 0
+    for p in _extrair(t, "PRODUTOS"):
+        if p.get("imagens"):
+            continue
+        fotos = []
+        for sufixo in [""] + [f"-{n}" for n in range(2, 9)]:
+            for ext in ("jpg", "jpeg", "png", "webp"):
+                f = pasta / f"{p['id']}{sufixo}.{ext}"
+                if f.exists():
+                    fotos.append(f"img/{f.name}")
+                    break
+        if fotos:
+            t = t.replace(f'id:"{p["id"]}",', f'id:"{p["id"]}", imagens:{json.dumps(fotos)},', 1)
+            novos += 1
+    if novos:
+        arq.write_text(t, encoding="utf-8")
+        print(f"Fotos ligadas a {novos} produto(s).")
+    return t
+
+
+TEXTO = vincular_imagens()
 LOJA = _extrair(TEXTO, "LOJA")
 PRODUTOS = _extrair(TEXTO, "PRODUTOS")
 CATS = {c["id"]: c["nome"] for c in _extrair(TEXTO, "CATEGORIAS")}
@@ -67,6 +94,7 @@ def pagina(caminho_rel, titulo, descricao, corpo, base="", extra_head="", body_a
 </main>
 {rebase(FIM, base)}
 <script src="{base}produtos.js"></script>
+<script src="{base}conta.js"></script>
 <script src="{base}app.js"></script>
 </body>
 </html>

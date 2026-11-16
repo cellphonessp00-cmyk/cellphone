@@ -206,7 +206,7 @@ def frete(cep, itens, subtotal):
     return valor, prazo
 
 
-def montar_carrinho(itens_cliente, pagamento, cep):
+def montar_carrinho(itens_cliente, pagamento, cep, cadastrado=False):
     """Recalcula tudo no servidor a partir do catálogo. Retorna (carrinho, erro)."""
     loja, prods = catalogo()
     if not isinstance(itens_cliente, list) or not itens_cliente or len(itens_cliente) > 30:
@@ -231,14 +231,18 @@ def montar_carrinho(itens_cliente, pagamento, cep):
             return None, (f"{p['nome']} esgotou." if disp <= 0 else f"Só temos {disp} unidade(s) de {p['nome']}.")
         itens.append({"id": pid, "nome": p["nome"], "marca": p.get("marca"), "quantidade": q, "voltagem": volt,
                       "preco_unit": float(p["preco"]), "categoria": p.get("categoria")})
-    fator = (1 - loja.get("descontoPix", 0) / 100) if pagamento == "pix" else 1
+    f_cad = (1 - loja.get("descontoCadastro", 0) / 100) if cadastrado else 1
+    f_pix = (1 - loja.get("descontoPix", 0) / 100) if pagamento == "pix" else 1
     for i in itens:  # preço efetivamente cobrado por unidade (é o mesmo enviado ao Mercado Pago)
-        i["preco_pago"] = round(i["preco_unit"] * fator + 1e-9, 2)
+        i["preco_cadastro"] = round(i["preco_unit"] * f_cad + 1e-9, 2)
+        i["preco_pago"] = round(i["preco_cadastro"] * f_pix + 1e-9, 2)
     subtotal = round(sum(i["preco_unit"] * i["quantidade"] for i in itens), 2)
+    desc_cad = round(subtotal - sum(i["preco_cadastro"] * i["quantidade"] for i in itens), 2)
     desconto = round(subtotal - sum(i["preco_pago"] * i["quantidade"] for i in itens), 2)
     vfrete, prazo = frete(cep, itens, subtotal)
     total = round(subtotal - desconto + vfrete, 2)
-    return {"itens": itens, "subtotal": subtotal, "desconto": desconto, "frete": vfrete, "prazo": prazo, "total": total}, None
+    return {"itens": itens, "subtotal": subtotal, "desconto": desconto, "desconto_cadastro": desc_cad,
+            "desconto_pix": round(desconto - desc_cad, 2), "frete": vfrete, "prazo": prazo, "total": total}, None
 
 
 # ===================== validações =====================
@@ -277,6 +281,121 @@ def admin_ok(token):
         return int(exp) > time.time() and hmac.compare_digest(sig, assinar("admin:" + exp))
     except Exception:
         return False
+
+
+# ===================== contas de clientes =====================
+def hash_senha(senha, sal=None):
+    sal = sal or secrets.token_hex(16)
+    h = hashlib.pbkdf2_hmac("sha256", senha.encode(), bytes.fromhex(sal), 200_000).hex()
+    return f"pbkdf2${sal}${h}"
+
+
+def senha_confere(senha, guardado):
+    try:
+        _, sal, h = guardado.split("$")
+        return hmac.compare_digest(hash_senha(senha, sal).split("$")[2], h)
+    except Exception:
+        return False
+
+
+def ler_conta(email):
+    v = redis("GET", f"conta:{email.lower()}")
+    return json.loads(v) if v else None
+
+
+def salvar_conta(c):
+    redis("SET", f"conta:{c['email']}", json.dumps(c, ensure_ascii=False))
+    redis("ZADD", "contas", c.get("criado_ts", time.time()), c["email"])
+
+
+def listar_contas(limite=2000):
+    emails = redis("ZREVRANGE", "contas", 0, limite - 1) or []
+    if not emails:
+        return []
+    vals = redis("MGET", *[f"conta:{e}" for e in emails]) or []
+    contas = [json.loads(v) for v in vals if v]
+    for c in contas:
+        c.pop("senha", None)
+    return contas
+
+
+def token_conta(email, dias=30):
+    exp = int(time.time()) + dias * 86400
+    corpo = base64.urlsafe_b64encode(email.encode()).decode().rstrip("=")
+    return f"{corpo}.{exp}.{assinar('conta:' + email + ':' + str(exp))}"
+
+
+def conta_do_token(token):
+    """Retorna a conta se o token (cabeçalho Authorization) for válido."""
+    try:
+        corpo, exp, sig = (token or "").split(".")
+        email = base64.urlsafe_b64decode(corpo + "=" * (-len(corpo) % 4)).decode()
+        if int(exp) < time.time() or not hmac.compare_digest(sig, assinar("conta:" + email + ":" + exp)):
+            return None
+        return ler_conta(email)
+    except Exception:
+        return None
+
+
+def conta_da_requisicao(h):
+    return conta_do_token((h.headers.get("Authorization") or "").removeprefix("Bearer ").strip())
+
+
+# ===================== planilhas Google (via Apps Script) =====================
+def planilha(tipo, dados):
+    """Envia uma linha para a planilha (tipo 'clientes' ou 'pedidos'). Falha não interrompe a venda."""
+    url, seg = ENV("PLANILHA_URL", ""), ENV("PLANILHA_SEGREDO", "")
+    if not (url and seg):
+        print(f"[planilha {tipo}] não configurada:", json.dumps(dados, ensure_ascii=False)[:200], flush=True)
+        return False
+    try:
+        req = urllib.request.Request(url, data=json.dumps({"segredo": seg, "tipo": tipo, "dados": dados}).encode(),
+                                     headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=12) as r:
+            ok = json.loads(r.read() or b"{}").get("ok")
+        if not ok:
+            print(f"[planilha {tipo}] recusada", flush=True)
+        return bool(ok)
+    except Exception as ex:
+        print(f"[planilha {tipo}] erro:", repr(ex), flush=True)
+        return False
+
+
+def linha_cliente(c, acesso=None):
+    return {"Data do cadastro": c.get("criado", ""), "Nome": c["nome"], "Sobrenome": c["sobrenome"], "E-mail": c["email"],
+            "Telefone": c["telefone"], "Aceita ofertas": "Sim" if c.get("ofertas") else "Não",
+            "Último acesso": acesso, "Pedidos": c.get("pedidos"), "Total comprado (R$)": c.get("total_comprado")}
+
+
+NOMES_STATUS = {"aguardando_pagamento": "Aguardando pagamento", "em_analise": "Em análise", "pagamento_recusado": "Pagamento recusado",
+                "pago": "Pago", "em_separacao": "Em separação", "faturado": "Faturado", "enviado": "Enviado", "entregue": "Entregue",
+                "cancelado": "Cancelado", "reembolsado": "Reembolsado", "estornado": "Estornado"}
+
+
+def linha_pedido(p):
+    c, e = p["cliente"], p["entrega"]
+    return {"Pedido": p["id"], "Data": p["criado"], "Status": NOMES_STATUS.get(p["status"], p["status"]),
+            "Cliente cadastrado": "Sim" if p.get("conta") else "Não", "Nome": c["nome"], "E-mail": c["email"],
+            "Telefone": c["telefone"], "CPF": c["cpf"], "CEP": e["cep"], "Endereço": e["rua"], "Número": e["numero"],
+            "Complemento": e.get("complemento", ""), "Bairro": e["bairro"], "Cidade": e["cidade"], "UF": e["uf"],
+            "Itens": " | ".join(f"{i['quantidade']}x {i['nome']}{' (' + i['voltagem'] + ')' if i.get('voltagem') else ''}" for i in p["itens"]),
+            "Pagamento": {"pix": "Pix", "cartao": "Cartão", "boleto": "Boleto"}.get(p["pagamento"], p["pagamento"]),
+            "Subtotal (R$)": p["subtotal"], "Desconto cadastro (R$)": p.get("desconto_cadastro", 0),
+            "Desconto Pix (R$)": p.get("desconto_pix", 0), "Frete (R$)": p["frete"], "Total (R$)": p["total"],
+            "Rastreio": p.get("rastreio", ""), "Atualizado em": agora_iso()}
+
+
+def registrar_compra_na_conta(ped):
+    """Soma o pedido pago no cadastro do cliente (para o CRM e a planilha de clientes)."""
+    if not ped.get("conta"):
+        return
+    c = ler_conta(ped["conta"])
+    if not c:
+        return
+    c["pedidos"] = int(c.get("pedidos") or 0) + 1
+    c["total_comprado"] = round(float(c.get("total_comprado") or 0) + ped["total"], 2)
+    salvar_conta(c)
+    planilha("clientes", linha_cliente(c))
 
 
 # ===================== Mercado Pago =====================
@@ -333,9 +452,13 @@ def atualizar_por_pagamento(pag):
         if novo == "pago" and not ped.get("estoque_baixado"):
             baixar_estoque(ped["itens"])
             ped["estoque_baixado"] = True
-        if ped["status"] != novo:
+            registrar_compra_na_conta(ped)
+        mudou = ped["status"] != novo
+        if mudou:
             ped.setdefault("historico", []).append({"quando": agora_iso(), "status": novo, "por": "Mercado Pago"})
         ped["status"] = novo
+        if mudou:
+            planilha("pedidos", linha_pedido(ped))
     salvar_pedido(ped)
     return ped
 

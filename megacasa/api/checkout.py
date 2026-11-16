@@ -50,7 +50,8 @@ class handler(BaseHTTPRequestHandler):
             if erros:
                 return L.responder(self, 400, {"erro": " ".join(erros)})
 
-            carrinho, erro = L.montar_carrinho(d.get("itens"), pagamento, cep)
+            conta = L.conta_da_requisicao(self)  # cliente logado ganha o desconto de cadastro
+            carrinho, erro = L.montar_carrinho(d.get("itens"), pagamento, cep, cadastrado=bool(conta))
             if erro:
                 return L.responder(self, 409, {"erro": erro})
 
@@ -65,7 +66,8 @@ class handler(BaseHTTPRequestHandler):
                             "complemento": L.limpar(e.get("complemento"), 60), "bairro": L.limpar(e.get("bairro"), 60),
                             "cidade": L.limpar(e.get("cidade"), 60), "uf": L.limpar(e.get("uf"), 2).upper(),
                             "prazo": carrinho["prazo"]},
-                **{k: carrinho[k] for k in ("itens", "subtotal", "desconto", "frete", "total")},
+                **{k: carrinho[k] for k in ("itens", "subtotal", "desconto", "desconto_cadastro", "desconto_pix", "frete", "total")},
+                "conta": conta["email"] if conta else None,
                 "historico": [{"quando": L.agora_iso(), "status": "aguardando_pagamento", "por": "site"}],
                 "notas": "",
             }
@@ -120,6 +122,7 @@ class handler(BaseHTTPRequestHandler):
                 pedido["mp_preferencia"] = "demo"
             pedido["link_pagamento"] = link
             L.salvar_pedido(pedido)
+            L.planilha("pedidos", L.linha_pedido(pedido))  # planilha de pedidos com o endereço de entrega
             return L.responder(self, 200, {"ok": True, "pedido": pid, "redirecionar": link})
         except Exception as ex:  # nunca devolve detalhes internos ao cliente
             print("checkout erro:", repr(ex), flush=True)

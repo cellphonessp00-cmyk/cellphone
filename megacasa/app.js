@@ -231,6 +231,9 @@ function produtoHTML(p, tag = "h2") {
       <div class="de">${off ? "de " + fmt(p.precoAntigo) + " por" : ""}</div>
       ${precoHTML(p.preco, off)}
       <div class="caixa-pag">
+        ${LOJA.descontoCadastro ? (window.CONTA?.logado()
+          ? `<div class="linha roxo" style="justify-content:flex-start">🎁 Seu preço de cadastrado: <b>&nbsp;${fmt(p.preco * (1 - LOJA.descontoCadastro / 100))}</b></div>`
+          : `<a href="#" data-abrir-conta="cadastrar" class="chamada-cadastro">🎁 Cadastre-se e pague ${fmt(p.preco * (1 - LOJA.descontoCadastro / 100))} (${LOJA.descontoCadastro}% OFF)</a>`) : ""}
         <div class="pix">💠 <b>${fmt(precoPix(p.preco))}</b> no Pix (${LOJA.descontoPix}% de desconto)</div>
         <div>💳 ${parcela(p)} no cartão</div>
         <div>🧾 ou ${fmt(p.preco)} no boleto</div>
@@ -289,6 +292,7 @@ function calcFrete(v) {
   if (d.length !== 8) { if (out) out.textContent = "Digite um CEP com 8 números."; return; }
   cep = d.slice(0, 5) + "-" + d.slice(5); gravar("mc_cep", cep);
   $("#cepTopoTxt").textContent = "Entregar em " + cep;
+  if ($("#modalCep")) { $("#modalCep").remove(); aviso("✓ CEP salvo: " + cep); return; }
   if (!out || !atual) return;
   const n = +d.slice(0, 2), capital = n <= 5, grandeSP = n <= 9, sp = n <= 19;
   const dias = atual.entregaRapida && capital ? "amanhã" : capital ? "em 1 a 2 dias úteis" : grandeSP ? "em 2 a 3 dias úteis" : sp ? "em 3 a 5 dias úteis" : "em 5 a 10 dias úteis";
@@ -352,14 +356,18 @@ function renderGaveta() {
     <div><h4>${esc(i.p.nome)}</h4>${i.volt ? `<small>Voltagem: ${i.volt}</small><br>` : ""}${i.p.estoque < i.qtd ? `<small style="color:var(--vermelho)">Estoque insuficiente</small><br>` : ""}<b>${fmt(i.p.preco * i.qtd)}</b><br><button class="remover" data-rem="${k}">Remover</button></div>
     <div class="qtd"><button data-cq="${k}:-1" aria-label="Menos">−</button><span>${i.qtd}</span><button data-cq="${k}:1" aria-label="Mais">+</button></div></div>`).join("");
   const sub = linhas.reduce((s, i) => s + i.p.preco * i.qtd, 0);
+  const pc = window.CONTA ? window.CONTA.desconto() : 0;
+  const descCad = pc ? sub - linhas.reduce((s, i) => s + Math.round(i.p.preco * (1 - pc / 100) * 100 + 1e-7) / 100 * i.qtd, 0) : 0;
   const gratis = sub >= LOJA.freteGratisAcima || linhas.every(i => i.p.freteGratis);
   const falta = LOJA.freteGratisAcima - sub;
   rod.innerHTML = `${!gratis && falta > 0 ? `<div class="linha muted" style="font-size:13px">Faltam ${fmt(falta)} para frete grátis</div>` : ""}
     <div class="linha"><span>Subtotal</span><span>${fmt(sub)}</span></div>
+    ${descCad ? `<div class="linha roxo"><span>🎁 Desconto de cadastro (${window.CONTA.desconto()}%)</span><span>− ${fmt(descCad)}</span></div>` : ""}
     <div class="linha"><span>Frete</span><span>${gratis ? `<b style="color:var(--verde)">Grátis</b>` : "a calcular"}</span></div>
-    <div class="linha total"><span>Total</span><span>${fmt(sub)}</span></div>
-    <div class="linha verde"><span>No Pix (${LOJA.descontoPix}% OFF)</span><span>${fmt(precoPix(sub))}</span></div>
-    <div class="linha muted" style="font-size:13px"><span>ou em até ${LOJA.parcelas}x de ${fmt(sub / LOJA.parcelas)} sem juros</span></div>
+    <div class="linha total"><span>Total</span><span>${fmt(sub - descCad)}</span></div>
+    <div class="linha verde"><span>No Pix (+${LOJA.descontoPix}% OFF)</span><span>${fmt(precoPix(sub - descCad))}</span></div>
+    <div class="linha muted" style="font-size:13px"><span>ou em até ${LOJA.parcelas}x de ${fmt((sub - descCad) / LOJA.parcelas)} sem juros</span></div>
+    ${!descCad && LOJA.descontoCadastro ? `<a href="#" class="chamada-cadastro" data-abrir-conta="cadastrar">🎁 Cadastre-se e economize ${fmt(sub * LOJA.descontoCadastro / 100)} nesta compra</a>` : ""}
     <a class="btn btn-pri" href="${BASE}checkout.html">🔒 Finalizar compra</a>
     <button class="btn btn-sec" data-fechar-gaveta>Continuar comprando</button>
     <a class="link-whats" target="_blank" rel="noopener" href="${linkWhats(pedidoTexto(linhas, sub))}">Prefere comprar pelo WhatsApp?</a>
@@ -443,6 +451,7 @@ function rodape() {
   if (el) el.textContent = `${LOJA.razaoSocial} · CNPJ ${LOJA.cnpj} · ${LOJA.endereco} · ${LOJA.email} · ${LOJA.telefone}`;
 }
 
+document.addEventListener("conta-mudou", () => { if (!$("#gaveta").hidden) renderGaveta(); if (document.body.dataset.produto) iniciarProduto.desenhar?.(); });
 function iniciarComum() {
   $("#avisoFrete").textContent = fmt(LOJA.freteGratisAcima).replace(",00", "");
   $("#avisoPix").textContent = `${LOJA.descontoPix}% OFF`;
@@ -468,7 +477,21 @@ function iniciarComum() {
   on("#abrirCarrinho", "click", () => abrirGaveta("carrinho"));
   on("#abrirFavs", "click", () => abrirGaveta("favs"));
   on("#abrirMenu", "click", () => $("#menuMobile").hidden = false);
-  on("#cepTopo", "click", () => { const v = prompt("Digite seu CEP para ver prazos de entrega:", cep); if (v) calcFrete(v); });
+  on("#cepTopo", "click", () => {
+    if ($("#cepIn")) { $("#cepIn").scrollIntoView({ block: "center", behavior: "smooth" }); $("#cepIn").focus(); return; }
+    let m = $("#modalCep");
+    if (!m) {
+      m = document.createElement("div"); m.id = "modalCep"; m.className = "modal";
+      m.innerHTML = `<div class="modal-fundo" data-fechar-cep></div><div class="modal-caixa" style="max-width:400px">
+        <button class="btn-icone modal-x" data-fechar-cep aria-label="Fechar">✕</button><h2 style="font-size:18px;margin-bottom:10px">Informe seu CEP</h2>
+        <p class="muted" style="font-size:14px">Para ver prazos e frete dos produtos.</p>
+        <form class="cep-calc" id="cepForm"><input id="cepIn" inputmode="numeric" maxlength="9" placeholder="00000-000" aria-label="CEP"><button class="btn btn-pri">Salvar</button></form>
+        <div class="cep-res" id="cepRes"></div></div>`;
+      document.body.appendChild(m);
+      m.addEventListener("click", e => { if (e.target.closest("[data-fechar-cep]")) m.remove(); });
+    }
+    $("#cepIn").value = cep; $("#cepIn").focus();
+  });
   document.addEventListener("submit", e => { if (e.target.id === "cepForm") { e.preventDefault(); calcFrete($("#cepIn").value); } });
   document.addEventListener("input", e => {
     if (e.target.id === "cepIn") { let v = e.target.value.replace(/\D/g, "").slice(0, 8); if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5); e.target.value = v; }
@@ -485,6 +508,7 @@ function iniciarProduto(id) {
     if (voltAtual) $$("#volts button").forEach(b => b.classList.add("ativo"));
     if (cep) calcFrete(cep);
   };
+  iniciarProduto.desenhar = desenhar;
   desenhar();
   sincronizarEstoque().then(ok => ok && desenhar());
 }

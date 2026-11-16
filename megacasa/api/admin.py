@@ -38,6 +38,7 @@ class handler(BaseHTTPRequestHandler):
             loja, prods = L.catalogo()
             L.responder(self, 200, {
                 "pedidos": L.listar_pedidos(),
+                "contas": L.listar_contas(),
                 "estoques": L.todos_estoques(),
                 "produtos": [{"id": p["id"], "nome": p["nome"], "preco": p["preco"], "categoria": p.get("categoria"),
                               "marca": p.get("marca")} for p in prods.values()],
@@ -84,6 +85,7 @@ class handler(BaseHTTPRequestHandler):
                     if st == "pago" and not ped.get("estoque_baixado"):
                         L.baixar_estoque(ped["itens"])
                         ped["estoque_baixado"] = True
+                        L.registrar_compra_na_conta(ped)
                     ped["status"] = st
                     ped.setdefault("historico", []).append({"quando": L.agora_iso(), "status": st, "por": "equipe"})
                 if "rastreio" in d:
@@ -91,6 +93,7 @@ class handler(BaseHTTPRequestHandler):
                 if "notas" in d:
                     ped["notas"] = L.limpar(d["notas"], 2000)
                 L.salvar_pedido(ped)
+                L.planilha("pedidos", L.linha_pedido(ped))
                 return L.responder(self, 200, {"ok": True, "pedido": ped})
 
             if acao == "sincronizar":

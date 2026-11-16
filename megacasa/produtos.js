@@ -11,6 +11,7 @@ const LOJA = {
   instagram: "cellphonessp00",    // sem @
   parcelas: 10,                   // parcelas sem juros
   descontoPix: 5,                 // % de desconto no Pix
+  descontoCadastro: 10,           // % de desconto para clientes cadastrados e logados (soma com o do Pix)
   freteGratisAcima: 299,          // frete grátis a partir deste valor
   limitePorProduto: 5,            // máximo de unidades de um mesmo produto por pedido
   mostrarAvaliacoes: false,       // true só quando "avaliacao", "avaliacoes" e "vendidos" forem números REAIS da loja

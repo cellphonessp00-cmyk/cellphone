@@ -160,9 +160,15 @@ document.addEventListener("click", async e => {
 /* ---------- clientes ---------- */
 function listaClientes() {
   const m = {};
+  // clientes cadastrados no site (mesmo os que ainda não compraram)
+  (D.contas || []).forEach(c => {
+    m[c.email] = { nome: `${c.nome} ${c.sobrenome}`, email: c.email, telefone: c.telefone, cpf: "", cidade: "", uf: "",
+      pedidos: 0, pagos: 0, gasto: 0, ultimo: c.criado, cadastro: c.criado, ofertas: c.ofertas };
+  });
   D.pedidos.forEach(p => {
-    const k = p.cliente.cpf || p.cliente.email;
-    const c = m[k] = m[k] || { ...p.cliente, cidade: p.entrega.cidade, uf: p.entrega.uf, pedidos: 0, pagos: 0, gasto: 0, ultimo: p.criado };
+    const k = p.conta || p.cliente.email;
+    const c = m[k] = m[k] || { ...p.cliente, pedidos: 0, pagos: 0, gasto: 0, ultimo: p.criado };
+    c.cpf = c.cpf || p.cliente.cpf; c.cidade = c.cidade || p.entrega.cidade; c.uf = c.uf || p.entrega.uf;
     c.pedidos++;
     if (VENDA.includes(p.status)) { c.pagos++; c.gasto += p.total; }
     if (p.criado > c.ultimo) c.ultimo = p.criado;
@@ -172,10 +178,11 @@ function listaClientes() {
 function clientes() {
   const t = $("#buscaCli").value.trim().toLowerCase();
   const l = listaClientes().filter(c => !t || [c.nome, c.email, c.cpf, c.telefone, c.cidade].join(" ").toLowerCase().includes(t));
-  $("#tabClientes").innerHTML = `<thead><tr><th>Cliente</th><th>Contato</th><th>Cidade</th><th>Pedidos</th><th>Total comprado</th><th>Última compra</th></tr></thead><tbody>` +
-    (l.map(c => `<tr><td><b>${esc(c.nome)}</b><br><small class="muted">CPF ${cpfFmt(c.cpf)}</small></td><td>${esc(c.email)}<br><a href="https://wa.me/55${esc(c.telefone)}" target="_blank" rel="noopener">${telFmt(c.telefone)}</a></td>
-      <td>${esc(c.cidade)}/${esc(c.uf)}</td><td>${c.pagos} pagos / ${c.pedidos}</td><td><b>${fmt(c.gasto)}</b></td><td>${dataBR(c.ultimo)}</td></tr>`).join("")
-      || `<tr><td colspan="6" class="muted">Nenhum cliente ainda.</td></tr>`) + "</tbody>";
+  $("#tabClientes").innerHTML = `<thead><tr><th>Cliente</th><th>Contato</th><th>Cidade</th><th>Cadastro no site</th><th>Pedidos</th><th>Total comprado</th><th>Última atividade</th></tr></thead><tbody>` +
+    (l.map(c => `<tr><td><b>${esc(c.nome)}</b>${c.cpf ? `<br><small class="muted">CPF ${cpfFmt(c.cpf)}</small>` : ""}</td><td>${esc(c.email)}<br><a href="https://wa.me/55${esc(c.telefone)}" target="_blank" rel="noopener">${telFmt(c.telefone)}</a></td>
+      <td>${c.cidade ? esc(c.cidade) + "/" + esc(c.uf) : "—"}</td><td>${c.cadastro ? `✅ ${dataBR(c.cadastro)}${c.ofertas ? " · aceita ofertas" : ""}` : "—"}</td>
+      <td>${c.pagos} pagos / ${c.pedidos}</td><td><b>${fmt(c.gasto)}</b></td><td>${dataBR(c.ultimo)}</td></tr>`).join("")
+      || `<tr><td colspan="7" class="muted">Nenhum cliente ainda.</td></tr>`) + "</tbody>";
 }
 $("#buscaCli").addEventListener("input", clientes);
 
@@ -197,7 +204,7 @@ function baixarCSV(nome, linhas) {
 $("#csvPedidos").addEventListener("click", () => baixarCSV("pedidos.csv", [["Pedido", "Data", "Status", "Cliente", "CPF", "E-mail", "Telefone", "Cidade", "UF", "CEP", "Itens", "Pagamento", "Subtotal", "Desconto", "Frete", "Total", "Rastreio"],
   ...filtrarPedidos().map(p => [p.id, p.criado, NOMES[p.status], p.cliente.nome, p.cliente.cpf, p.cliente.email, p.cliente.telefone, p.entrega.cidade, p.entrega.uf, p.entrega.cep,
     p.itens.map(i => `${i.quantidade}x ${i.nome}${i.voltagem ? " " + i.voltagem : ""}`).join(" | "), PAG[p.pagamento], p.subtotal, p.desconto, p.frete, p.total, p.rastreio || ""])]));
-$("#csvClientes").addEventListener("click", () => baixarCSV("clientes.csv", [["Nome", "CPF", "E-mail", "Telefone", "Cidade", "UF", "Pedidos", "Pagos", "Total comprado", "Última compra"],
-  ...listaClientes().map(c => [c.nome, c.cpf, c.email, c.telefone, c.cidade, c.uf, c.pedidos, c.pagos, c.gasto.toFixed(2).replace(".", ","), c.ultimo])]));
+$("#csvClientes").addEventListener("click", () => baixarCSV("clientes.csv", [["Nome", "CPF", "E-mail", "Telefone", "Cidade", "UF", "Cadastrado em", "Aceita ofertas", "Pedidos", "Pagos", "Total comprado", "Última atividade"],
+  ...listaClientes().map(c => [c.nome, c.cpf, c.email, c.telefone, c.cidade, c.uf, c.cadastro || "", c.ofertas ? "Sim" : "", c.pedidos, c.pagos, c.gasto.toFixed(2).replace(".", ","), c.ultimo])]));
 
 if (token) entrar().then(() => { if ($("#app").hidden) sair(); }); else sair();

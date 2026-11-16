@@ -52,7 +52,7 @@ async function carregar() {
     ${p.itens.map(i => `<div class="linha" style="padding:6px 0;border-bottom:1px solid var(--borda)"><span>${i.quantidade}x ${esc(i.nome)}${i.voltagem ? " (" + esc(i.voltagem) + ")" : ""}</span><span>${fmt(i.preco_unit * i.quantidade)}</span></div>`).join("")}
     <div style="display:grid;gap:6px;margin-top:10px">
       <div class="linha"><span>Subtotal</span><span>${fmt(p.subtotal)}</span></div>
-      ${p.desconto ? `<div class="linha verde"><span>Desconto Pix</span><span>− ${fmt(p.desconto)}</span></div>` : ""}
+      ${p.desconto ? `<div class="linha verde"><span>Descontos (cadastro/Pix)</span><span>− ${fmt(p.desconto)}</span></div>` : ""}
       <div class="linha"><span>Frete</span><span>${p.frete ? fmt(p.frete) : "Grátis"}</span></div>
       <div class="linha total"><span>Total</span><span>${fmt(p.total)}</span></div>
       <div class="linha muted"><span>Pagamento</span><span>${PAG[p.pagamento] || p.pagamento}${p.pagamento_mp?.parcelas > 1 ? ` em ${p.pagamento_mp.parcelas}x` : ""}</span></div>
