@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Política de entrega | Mega Casa SP</title>
+<meta name="description" content="Prazos, valores de frete e regras de entrega da Mega Casa SP.">
+<meta name="theme-color" content="#0b2d6b">
+
+<link rel="canonical" href="https://megacasasp.vercel.app/entrega.html">
+<meta property="og:site_name" content="Mega Casa SP">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Política de entrega | Mega Casa SP">
+<meta property="og:description" content="Prazos, valores de frete e regras de entrega da Mega Casa SP.">
+<meta property="og:url" content="https://megacasasp.vercel.app/entrega.html">
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-base="" >
+<div class="topo-aviso">
+  <span>🚚 Frete grátis acima de <b id="avisoFrete">R$ 299</b></span>
+  <span>💠 <b id="avisoPix">5% OFF</b> no Pix</span>
+  <span>💳 Até <b id="avisoParc">10x</b> sem juros</span>
+</div>
+
+<header class="cab" id="cab">
+  <div class="cab-linha">
+    <button class="btn-icone so-mobile" id="abrirMenu" aria-label="Categorias">☰</button>
+    <a href="./" class="logo" id="logo"><span class="logo-marca">Mega</span><span class="logo-casa">Casa</span><small>SP</small></a>
+    <form class="busca" id="busca" role="search" autocomplete="off">
+      <input id="q" type="search" placeholder="Buscar air fryer, moto elétrica, geladeira..." aria-label="Buscar produtos">
+      <button aria-label="Buscar">🔍</button>
+      <ul class="sugestoes" id="sugestoes" hidden></ul>
+    </form>
+    <button class="cep-btn so-desktop" id="cepTopo">📍 <span id="cepTopoTxt">Informe seu CEP</span></button>
+    <button class="btn-icone" id="abrirFavs" aria-label="Favoritos">♡<span class="bolha" id="qtdFavs" hidden>0</span></button>
+    <button class="btn-icone" id="abrirCarrinho" aria-label="Carrinho">🛒<span class="bolha" id="qtdCarrinho" hidden>0</span></button>
+  </div>
+  <nav class="menu-cats" id="menuCats"></nav>
+</header>
+<main class="cont">
+<article class="caixa texto-legal" style="margin-top:16px"><h1>Política de entrega</h1>
+<p>O prazo de entrega começa a contar após a aprovação do pagamento (Pix e cartão: na hora; boleto: até 3 dias úteis).</p>
+<h2>Frete</h2><p>Frete grátis para compras a partir de R$ 299,00 e para produtos com o selo "Frete grátis". Para os demais, o valor é mostrado antes da finalização da compra.</p>
+<h2>Prazos estimados</h2><ul><li>São Paulo capital: 1 a 2 dias úteis (produtos com entrega rápida: no dia seguinte)</li><li>Grande São Paulo: 2 a 3 dias úteis</li><li>Interior de SP: 3 a 5 dias úteis</li><li>Demais estados: 5 a 10 dias úteis</li></ul>
+<h2>Produtos de grande porte</h2><p>Geladeiras, lavadoras e motos elétricas são entregues até a porta da residência, em horário comercial. Confira as medidas de portas, corredores e elevadores antes da compra. É necessário que um responsável maior de 18 anos receba e confira o produto no ato da entrega.</p>
+<h2>Na entrega</h2><p>Recuse o produto se a embalagem estiver violada ou danificada e entre em contato conosco.</p></article>
+</main>
+<footer class="rodape">
+  <div class="cont rodape-cols">
+    <div>
+      <a href="./" class="logo claro"><span class="logo-marca">Mega</span><span class="logo-casa">Casa</span><small>SP</small></a>
+      <p id="slogan"></p>
+      <p><a id="linkInsta" target="_blank" rel="noopener">📷 Instagram</a> · <a id="linkWhats" target="_blank" rel="noopener">💬 WhatsApp</a></p>
+    </div>
+    <div><h4>Institucional</h4><p class="links-rodape">
+      <a href="atendimento.html">Central de atendimento</a><a href="pedido.html">Acompanhe seu pedido</a>
+      <a href="trocas-e-devolucoes.html">Trocas e devoluções</a><a href="entrega.html">Política de entrega</a>
+      <a href="politica-de-privacidade.html">Política de privacidade</a><a href="termos-de-uso.html">Termos de uso</a></p></div>
+    <div><h4>Formas de pagamento</h4><div class="pagamentos"><span>Pix</span><span>Visa</span><span>Master</span><span>Elo</span><span>Amex</span><span>Hiper</span><span>Boleto</span></div>
+      <p style="font-size:12px;margin-top:8px">Pagamentos processados pelo <b>Mercado Pago</b>.</p></div>
+    <div><h4>Compra segura</h4><p>🔒 Site com certificado SSL<br>🛡️ Dados protegidos (LGPD)<br>✅ Pagamento via Mercado Pago<br>↩️ 7 dias para devolução</p></div>
+  </div>
+  <p class="cont legal" id="dadosEmpresa"></p>
+  <p class="cont legal">Preços e condições válidos para compras no site, sujeitos a alteração sem aviso prévio e à disponibilidade de estoque. Imagens ilustrativas. Motos e ciclomotores elétricos: consulte as regras de habilitação e emplacamento do CONTRAN.</p>
+</footer>
+
+<!-- Produto -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-fundo" data-fechar></div>
+  <div class="modal-caixa" role="dialog" aria-modal="true" aria-labelledby="mNome">
+    <button class="btn-icone modal-x" data-fechar aria-label="Fechar">✕</button>
+    <div id="modalCorpo"></div>
+  </div>
+</div>
+
+<!-- Carrinho / favoritos -->
+<div class="gaveta" id="gaveta" hidden>
+  <div class="modal-fundo" data-fechar-gaveta></div>
+  <aside class="gaveta-caixa">
+    <div class="gaveta-cab"><h3 id="gavetaTit">Carrinho</h3><button class="btn-icone" data-fechar-gaveta aria-label="Fechar">✕</button></div>
+    <div class="gaveta-itens" id="gavetaItens"></div>
+    <div class="gaveta-rodape" id="gavetaRodape"></div>
+  </aside>
+</div>
+
+<!-- Menu mobile -->
+<div class="gaveta esq" id="menuMobile" hidden>
+  <div class="modal-fundo" data-fechar-menu></div>
+  <aside class="gaveta-caixa">
+    <div class="gaveta-cab"><h3>Categorias</h3><button class="btn-icone" data-fechar-menu aria-label="Fechar">✕</button></div>
+    <div id="menuMobileLista" class="menu-mobile-lista"></div>
+  </aside>
+</div>
+
+<div class="aviso" id="aviso" role="status" hidden></div>
+
+
+<script src="produtos.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

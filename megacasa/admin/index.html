@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel de vendas | Mega Casa SP</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin">
+
+<section id="telaLogin" class="login" hidden>
+  <form id="formLogin" class="caixa">
+    <div class="logo" style="color:var(--azul)"><span class="logo-marca" style="color:var(--laranja)">Mega</span><span>Casa</span><small>SP</small></div>
+    <h1>Painel de vendas</h1>
+    <label class="campo">Senha<input type="password" name="senha" autocomplete="current-password" required></label>
+    <div class="erro-box" id="erroLogin" hidden></div>
+    <button class="btn btn-pri largo">Entrar</button>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <header class="adm-cab">
+    <b>Mega Casa SP · Painel</b>
+    <nav id="abas">
+      <button data-aba="resumo" class="ativo">📊 Visão geral</button>
+      <button data-aba="pedidos">🧾 Pedidos</button>
+      <button data-aba="clientes">👥 Clientes</button>
+      <button data-aba="estoque">📦 Estoque</button>
+    </nav>
+    <div class="adm-acoes"><span id="mpStatus"></span><button class="btn btn-sec" id="atualizar">↻ Atualizar</button><button class="btn btn-sec" id="sair">Sair</button></div>
+  </header>
+  <main class="adm-main">
+    <section data-tela="resumo">
+      <div class="kpis" id="kpis"></div>
+      <div class="adm-grid">
+        <div class="caixa"><h2>Vendas pagas · últimos 14 dias</h2><div class="barras" id="grafico"></div></div>
+        <div class="caixa"><h2>Produtos mais vendidos</h2><ol id="topProdutos" class="top"></ol></div>
+      </div>
+      <div class="caixa"><h2>Precisa de atenção</h2><div id="atencao"></div></div>
+    </section>
+
+    <section data-tela="pedidos" hidden>
+      <div class="filtros-adm">
+        <input id="buscaPed" type="search" placeholder="Buscar por nº, nome, e-mail, CPF ou produto">
+        <select id="filtroStatus"><option value="">Todos os status</option></select>
+        <button class="btn btn-sec" id="csvPedidos">⬇ Exportar CSV</button>
+      </div>
+      <div class="tabela-wrap"><table class="tabela" id="tabPedidos"></table></div>
+    </section>
+
+    <section data-tela="clientes" hidden>
+      <div class="filtros-adm"><input id="buscaCli" type="search" placeholder="Buscar cliente"><button class="btn btn-sec" id="csvClientes">⬇ Exportar CSV</button></div>
+      <div class="tabela-wrap"><table class="tabela" id="tabClientes"></table></div>
+    </section>
+
+    <section data-tela="estoque" hidden>
+      <p class="muted">O estoque é atualizado sozinho quando um pagamento é aprovado. Ajuste aqui quando chegar mercadoria.</p>
+      <div class="tabela-wrap"><table class="tabela" id="tabEstoque"></table></div>
+    </section>
+  </main>
+</div>
+
+<div class="gaveta" id="detalhe" hidden>
+  <div class="modal-fundo" data-fechar-det></div>
+  <aside class="gaveta-caixa" style="width:min(560px,100%)">
+    <div class="gaveta-cab"><h3 id="detTit">Pedido</h3><button class="btn-icone" data-fechar-det aria-label="Fechar">✕</button></div>
+    <div class="gaveta-itens" id="detCorpo"></div>
+  </aside>
+</div>
+<div class="aviso" id="aviso" hidden></div>
+
+<script src="admin.js"></script>
+</body>
+</html>

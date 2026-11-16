@@ -2,6 +2,8 @@ __pycache__/
 *.pyc
 .env
 pedidos.jsonl
+.dados-local.json
+.vercel/
 .claude/
 posts-blackfriday/
 Thumbs.db

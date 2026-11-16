@@ -3,9 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mega Casa SP — Eletrodomésticos e Motos Elétricas</title>
-<meta name="description" content="Eletrodomésticos, motos elétricas, bikes e patinetes com frete grátis, Pix com desconto e parcelamento sem juros.">
+<title>Mega Casa SP | Eletrodomésticos e Motos Elétricas com Frete Grátis</title>
+<meta name="description" content="Compre geladeira, lava e seca, air fryer, ar-condicionado, Smart TV e motos elétricas com até 10x sem juros, 5% OFF no Pix e entrega rápida em São Paulo.">
 <meta name="theme-color" content="#0b2d6b">
+<!--SEO-->
+<link rel="canonical" href="https://megacasasp.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mega Casa SP">
+<meta property="og:title" content="Mega Casa SP | Eletrodomésticos e Motos Elétricas">
+<meta property="og:url" content="https://megacasasp.vercel.app/">
+<meta property="og:locale" content="pt_BR">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "OnlineStore", "name": "Mega Casa SP", "url": "https://megacasasp.vercel.app/", "email": "contato@seudominio.com.br", "telephone": "(11) 99999-9999", "taxID": "00.000.000/0001-00", "legalName": "PREENCHER RAZÃO SOCIAL LTDA", "sameAs": ["https://www.instagram.com/cellphonessp00/"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Mega Casa SP", "url": "https://megacasasp.vercel.app/", "potentialAction": {"@type": "SearchAction", "target": "https://megacasasp.vercel.app/#q={search_term_string}", "query-input": "required name=search_term_string"}}</script>
+<!--/SEO-->
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,7 +27,7 @@
   <span>💳 Até <b id="avisoParc">10x</b> sem juros</span>
 </div>
 
-<header class="cab">
+<header class="cab" id="cab">
   <div class="cab-linha">
     <button class="btn-icone so-mobile" id="abrirMenu" aria-label="Categorias">☰</button>
     <a href="#" class="logo" id="logo"><span class="logo-marca">Mega</span><span class="logo-casa">Casa</span><small>SP</small></a>
@@ -55,7 +66,7 @@
     <div class="bloco-tit">
       <h2>⚡ Ofertas do dia</h2>
       <div class="cronometro">Termina em <b id="cronometro">--:--:--</b></div>
-      <a href="#catalogo" class="ver-tudo" data-ordem="desconto">Ver todas</a>
+      <a href="#ofertas" class="ver-tudo" data-ordem="desconto">Ver todas</a>
     </div>
     <div class="carrossel" id="ofertasDia"></div>
   </section>
@@ -63,7 +74,7 @@
   <section class="cont bloco faixa-moto">
     <div class="bloco-tit">
       <h2>🛵 Mobilidade elétrica em alta</h2>
-      <a href="#catalogo" class="ver-tudo" data-cat="motos">Ver motos</a>
+      <a href="#c=motos" class="ver-tudo" data-cat="motos">Ver motos</a>
     </div>
     <div class="carrossel" id="mobilidade"></div>
   </section>
@@ -126,11 +137,16 @@
       <p id="slogan"></p>
       <p><a id="linkInsta" target="_blank" rel="noopener">📷 Instagram</a> · <a id="linkWhats" target="_blank" rel="noopener">💬 WhatsApp</a></p>
     </div>
-    <div><h4>Atendimento</h4><p>Seg a sáb, 9h às 19h<br>Troca em até 7 dias<br>Garantia de fábrica</p></div>
-    <div><h4>Pagamento</h4><div class="pagamentos"><span>Pix</span><span>Visa</span><span>Master</span><span>Elo</span><span>Boleto</span></div></div>
-    <div><h4>Segurança</h4><p>🔒 Site protegido<br>Compra pelo WhatsApp com atendente</p></div>
+    <div><h4>Institucional</h4><p class="links-rodape">
+      <a href="atendimento.html">Central de atendimento</a><a href="pedido.html">Acompanhe seu pedido</a>
+      <a href="trocas-e-devolucoes.html">Trocas e devoluções</a><a href="entrega.html">Política de entrega</a>
+      <a href="politica-de-privacidade.html">Política de privacidade</a><a href="termos-de-uso.html">Termos de uso</a></p></div>
+    <div><h4>Formas de pagamento</h4><div class="pagamentos"><span>Pix</span><span>Visa</span><span>Master</span><span>Elo</span><span>Amex</span><span>Hiper</span><span>Boleto</span></div>
+      <p style="font-size:12px;margin-top:8px">Pagamentos processados pelo <b>Mercado Pago</b>.</p></div>
+    <div><h4>Compra segura</h4><p>🔒 Site com certificado SSL<br>🛡️ Dados protegidos (LGPD)<br>✅ Pagamento via Mercado Pago<br>↩️ 7 dias para devolução</p></div>
   </div>
-  <p class="cont legal">Imagens ilustrativas. Preços e estoque sujeitos a alteração. Motos e ciclomotores elétricos: consulte as regras de habilitação e emplacamento do CONTRAN.</p>
+  <p class="cont legal" id="dadosEmpresa"></p>
+  <p class="cont legal">Preços e condições válidos para compras no site, sujeitos a alteração sem aviso prévio e à disponibilidade de estoque. Imagens ilustrativas. Motos e ciclomotores elétricos: consulte as regras de habilitação e emplacamento do CONTRAN.</p>
 </footer>
 
 <!-- Produto -->

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finalizar compra | Mega Casa SP</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b2d6b">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-pagina="checkout">
+<header class="cab-checkout">
+  <div class="cont">
+    <a href="./" class="logo"><span class="logo-marca">Mega</span><span class="logo-casa">Casa</span><small>SP</small></a>
+    <span class="seguro-tag">🔒 Compra 100% segura</span>
+  </div>
+</header>
+
+<main class="cont">
+  <div class="etapas"><span>1. Carrinho</span><span class="ativa">2. Identificação e entrega</span><span class="ativa">3. Pagamento</span><span>4. Confirmação</span></div>
+
+  <div id="vazio" class="caixa" hidden style="text-align:center">
+    <h2 style="justify-content:center">Seu carrinho está vazio</h2>
+    <a class="btn btn-pri" href="./">Ver produtos</a>
+  </div>
+
+  <form class="checkout" id="form" novalidate hidden>
+    <div>
+      <section class="caixa">
+        <h2><span class="num">1</span> Identificação</h2>
+        <div class="campos">
+          <label class="campo">Nome completo<input name="nome" autocomplete="name" required maxlength="80"></label>
+          <label class="campo m3">E-mail<input name="email" type="email" autocomplete="email" required maxlength="120"><small>Enviaremos a confirmação do pedido.</small></label>
+          <label class="campo m3">Celular com DDD<input name="telefone" inputmode="tel" autocomplete="tel-national" required placeholder="(11) 99999-9999" maxlength="15"></label>
+          <label class="campo m3">CPF<input name="cpf" inputmode="numeric" required placeholder="000.000.000-00" maxlength="14"><small>Obrigatório para emissão da nota fiscal.</small></label>
+        </div>
+      </section>
+
+      <section class="caixa">
+        <h2><span class="num">2</span> Endereço de entrega</h2>
+        <div class="campos">
+          <label class="campo m2">CEP<input name="cep" inputmode="numeric" autocomplete="postal-code" required placeholder="00000-000" maxlength="9"></label>
+          <div class="campo m4" style="justify-content:flex-end"><small id="cepInfo"><a href="https://buscacepinter.correios.com.br/" target="_blank" rel="noopener">Não sei meu CEP</a></small></div>
+          <label class="campo m4">Endereço<input name="rua" autocomplete="address-line1" required maxlength="120"></label>
+          <label class="campo m2">Número<input name="numero" required maxlength="10"></label>
+          <label class="campo m3">Complemento <small>(opcional)</small><input name="complemento" autocomplete="address-line2" maxlength="60"></label>
+          <label class="campo m3">Bairro<input name="bairro" required maxlength="60"></label>
+          <label class="campo m4">Cidade<input name="cidade" autocomplete="address-level2" required maxlength="60"></label>
+          <label class="campo m2">UF<input name="uf" autocomplete="address-level1" required maxlength="2"></label>
+        </div>
+        <p class="muted" id="prazoTxt" style="font-size:14px;margin:12px 0 0"></p>
+      </section>
+
+      <section class="caixa">
+        <h2><span class="num">3</span> Forma de pagamento</h2>
+        <div class="opcoes-pag" id="opcoesPag"></div>
+        <p class="muted" style="font-size:13px;margin:12px 0 0">Ao continuar, você será levado ao ambiente seguro do <b>Mercado Pago</b> para concluir o pagamento. Não armazenamos dados do seu cartão.</p>
+      </section>
+    </div>
+
+    <aside class="resumo">
+      <section class="caixa">
+        <h2>Resumo do pedido</h2>
+        <div id="resumoItens"></div>
+        <div style="display:grid;gap:6px;margin-top:12px" id="resumoValores"></div>
+        <label class="aceite"><input type="checkbox" name="aceite" required> <span>Li e aceito os <a href="termos-de-uso.html" target="_blank">Termos de uso</a>, a <a href="trocas-e-devolucoes.html" target="_blank">Política de trocas</a> e a <a href="politica-de-privacidade.html" target="_blank">Política de privacidade</a>.</span></label>
+        <div class="erro-box" id="erro" hidden></div>
+        <button class="btn btn-pri largo" id="pagar" style="margin-top:10px">🔒 Ir para o pagamento</button>
+        <div class="selos-pag"><span>🔒 SSL</span><span>🛡️ LGPD</span><span>✅ Mercado Pago</span></div>
+        <a href="./" class="muted" style="display:block;text-align:center;font-size:13px;margin-top:10px">← Continuar comprando</a>
+      </section>
+    </aside>
+  </form>
+</main>
+
+<footer class="rodape" style="margin-top:0">
+  <p class="cont legal" id="dadosEmpresa"></p>
+</footer>
+
+<script src="produtos.js"></script>
+<script src="checkout.js"></script>
+</body>
+</html>

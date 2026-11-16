@@ -1,5 +1,5 @@
 /* =========================================================
-   MEGA CASA SP — dados da loja e produtos
+   MEGA CASA  — dados da loja e produtos
    Único arquivo que você precisa editar para mudar preços,
    estoque, fotos e textos.
    ========================================================= */
@@ -11,7 +11,18 @@ const LOJA = {
   instagram: "cellphonessp00",    // sem @
   parcelas: 10,                   // parcelas sem juros
   descontoPix: 5,                 // % de desconto no Pix
-  freteGratisAcima: 299           // frete grátis a partir deste valor
+  freteGratisAcima: 299,          // frete grátis a partir deste valor
+  limitePorProduto: 5,            // máximo de unidades de um mesmo produto por pedido
+  mostrarAvaliacoes: false,       // true só quando "avaliacao", "avaliacoes" e "vendidos" forem números REAIS da loja
+
+  // Dados obrigatórios em loja virtual (Decreto 7.962/2013) — PREENCHA com os dados reais da empresa
+  razaoSocial: "PREENCHER RAZÃO SOCIAL LTDA",
+  cnpj: "00.000.000/0001-00",
+  endereco: "Rua Exemplo, 123 — São Paulo/SP — CEP 00000-000",
+  email: "contato@seudominio.com.br",
+  telefone: "(11) 99999-9999",
+  faturaCartao: "MEGACASASP",     // nome que aparece na fatura do cartão (até 13 letras)
+  site: "https://megacasasp.vercel.app"  // endereço final do site (troque quando tiver domínio próprio)
 };
 
 const CATEGORIAS = [
@@ -27,7 +38,9 @@ const CATEGORIAS = [
 
 /* Campos: id, nome, marca, categoria, arte (ilustração), cor, preco, precoAntigo,
    estoque, avaliacao (0-5), avaliacoes, vendidos, freteGratis, entregaRapida,
-   voltagens (lista ou null), destaque, specs, descricao, imagem (caminho ou null) */
+   voltagens (lista ou null), destaque, specs, descricao,
+   imagens: ["img/<id>/1.jpg", "img/<id>/2.jpg", ...]  -> fotos reais do produto (a 1ª é a capa).
+   Sem "imagens", o site mostra a ilustração automática. */
 const PRODUTOS = [
   { id:"moto-eletrica-urban-3000", nome:"Moto Elétrica Urban 3000W Bateria de Lítio 72V", marca:"Volta Moto", categoria:"motos", arte:"moto", cor:"#1f6feb",
     preco:18990, precoAntigo:22990, estoque:6, avaliacao:4.8, avaliacoes:312, vendidos:900, freteGratis:true, entregaRapida:false, voltagens:null, destaque:true,
