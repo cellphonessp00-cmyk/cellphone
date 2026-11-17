@@ -22,8 +22,26 @@ BR = timezone(timedelta(hours=-3))
 
 ENV = os.environ.get
 MP_TOKEN = lambda: ENV("MP_ACCESS_TOKEN", "")
-SEGREDO = lambda: ENV("SEGREDO_APP") or ENV("MP_ACCESS_TOKEN") or "dev-somente-local"
-SITE = lambda: (ENV("SITE_URL") or "http://localhost:8790").rstrip("/")
+_segredo = {}
+
+
+def SEGREDO():
+    """Chave que assina links de pedido e logins. Usa SEGREDO_APP se existir; senão gera uma
+    aleatória na primeira vez e guarda no banco (assim não é preciso configurar nada)."""
+    if ENV("SEGREDO_APP"):
+        return ENV("SEGREDO_APP")
+    if "v" not in _segredo:
+        redis("SET", "app:segredo", secrets.token_urlsafe(48), "NX")
+        _segredo["v"] = redis("GET", "app:segredo")
+    return _segredo["v"]
+
+
+def SITE():
+    """Endereço público do site: SITE_URL, ou o endereço de produção que a Vercel informa sozinha."""
+    url = ENV("SITE_URL")
+    if not url and ENV("VERCEL_PROJECT_PRODUCTION_URL"):
+        url = "https://" + ENV("VERCEL_PROJECT_PRODUCTION_URL")
+    return (url or "http://localhost:8790").rstrip("/")
 
 
 # ===================== catálogo =====================

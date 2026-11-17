@@ -16,12 +16,16 @@ const LOJA = {
   limitePorProduto: 5,            // máximo de unidades de um mesmo produto por pedido
   mostrarAvaliacoes: false,       // true só quando "avaliacao", "avaliacoes" e "vendidos" forem números REAIS da loja
 
-  // Dados obrigatórios em loja virtual (Decreto 7.962/2013) — PREENCHA com os dados reais da empresa
-  razaoSocial: "PREENCHER RAZÃO SOCIAL LTDA",
-  cnpj: "00.000.000/0001-00",
-  endereco: "Rua Exemplo, 123 — São Paulo/SP — CEP 00000-000",
-  email: "contato@seudominio.com.br",
-  telefone: "(11) 99999-9999",
+  // Modo demonstração: mostra uma faixa avisando que a loja está em testes e que os dados da empresa são fictícios.
+  // Troque para false quando colocar os dados reais abaixo e o token de produção do Mercado Pago.
+  demonstracao: true,
+
+  // Dados obrigatórios em loja virtual (Decreto 7.962/2013) — FICTÍCIOS por enquanto, troque pelos reais
+  razaoSocial: "Mega Casa SP Comércio de Eletrodomésticos Ltda",
+  cnpj: "00.000.000/0000-00",
+  endereco: "Av. Paulista, 1000, Sala 101 — Bela Vista — São Paulo/SP — CEP 01310-100",
+  email: "atendimento@megacasasp.com.br",
+  telefone: "(11) 4000-0000",
   faturaCartao: "MEGACASASP",     // nome que aparece na fatura do cartão (até 13 letras)
   site: "https://megacasasp.vercel.app"  // endereço final do site (troque quando tiver domínio próprio)
 };

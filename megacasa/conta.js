@@ -16,6 +16,14 @@
   };
   function avisar() { atualizarCabecalho(); document.dispatchEvent(new CustomEvent("conta-mudou")); }
 
+  if (LOJA.demonstracao) {
+    const f = document.createElement("div");
+    f.className = "faixa-demo";
+    f.setAttribute("role", "note");
+    f.textContent = "🧪 Loja em demonstração: pagamentos em modo de teste e dados da empresa fictícios.";
+    document.body.prepend(f);
+  }
+
   function atualizarCabecalho() {
     const t = document.getElementById("contaTxt");
     if (t) t.innerHTML = CONTA.logado() ? `Olá, <b>${esc(CONTA.atual.nome)}</b>` : `Entre ou <b>cadastre-se</b>`;

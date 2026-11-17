@@ -335,3 +335,5 @@ a.mini{display:block}
   .bloco{border-radius:0;margin-left:-16px;margin-right:-16px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+.faixa-demo{background:#111827;color:#fde68a;text-align:center;font-size:12px;padding:5px 12px;line-height:1.4}
