@@ -162,10 +162,10 @@ function limpar() {
 
 /* ---------- home ---------- */
 const BANNERS = [
-  { tit: "Motos elétricas com até 20% OFF", txt: "Sem gasolina, sem rodízio. Bateria de lítio e entrega em SP.", selo: "MOBILIDADE ELÉTRICA", cat: "motos", fundo: "linear-gradient(120deg,#0b2d6b,#1d4ed8 60%,#06b6d4)", prod: "moto-eletrica-urban-3000" },
+  { tit: "Motos elétricas com até 20% OFF", txt: "Sem gasolina, sem rodízio. Bateria de lítio e entrega em SP.", selo: "MOBILIDADE ELÉTRICA", cat: "motos", fundo: "linear-gradient(120deg,#0b2d6b,#1d4ed8 60%,#06b6d4)", prod: "scooter-eletrica-city-2000" },
   { tit: "Semana da Air Fryer", txt: "A partir de R$ 349,90 com 5% OFF no Pix.", selo: "MAIS VENDIDA DO BRASIL", cat: "cozinha", fundo: "linear-gradient(120deg,#7c2d12,#ea580c 60%,#facc15)", prod: "airfryer-mondial-5l" },
   { tit: "Ar-condicionado inverter", txt: "Até 70% de economia de energia. 10x sem juros.", selo: "VERÃO 2026", cat: "climatizacao", fundo: "linear-gradient(120deg,#064e3b,#059669 60%,#a3e635)", prod: "ar-split-lg-12000" },
-  { tit: "Geladeiras e lava e seca", txt: "Frete grátis para toda a Grande SP.", selo: "CASA NOVA", cat: "refrigeracao", fundo: "linear-gradient(120deg,#312e81,#6d28d9 60%,#ec4899)", prod: "geladeira-samsung-side-602l" }
+  { tit: "Geladeiras e lava e seca", txt: "Frete grátis para toda a Grande SP.", selo: "CASA NOVA", cat: "refrigeracao", fundo: "linear-gradient(120deg,#312e81,#6d28d9 60%,#ec4899)", prod: "geladeira-french-door-570l" }
 ];
 let heroI = 0, heroTimer;
 function renderHero() {

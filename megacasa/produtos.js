@@ -40,14 +40,15 @@ const CATEGORIAS = [
 /* Campos: id, nome, marca, categoria, arte (ilustração), cor, preco, precoAntigo,
    estoque, avaliacao (0-5), avaliacoes, vendidos, freteGratis, entregaRapida,
    voltagens (lista ou null), destaque, specs, descricao,
-   imagens: ["img/<id>/1.jpg", "img/<id>/2.jpg", ...]  -> fotos reais do produto (a 1ª é a capa).
+   imagens: ["img/<id>.jpg", "img/<id>-2.jpg", ...]  -> fotos do produto (a 1ª é a capa).
+   Basta salvar as fotos em img/ com esses nomes e rodar "python gerar_site.py": ele preenche este campo sozinho.
    Sem "imagens", o site mostra a ilustração automática. */
 const PRODUTOS = [
   { id:"moto-eletrica-urban-3000", nome:"Moto Elétrica Urban 3000W Bateria de Lítio 72V", marca:"Volta Moto", categoria:"motos", arte:"moto", cor:"#1f6feb",
     preco:18990, precoAntigo:22990, estoque:6, avaliacao:4.8, avaliacoes:312, vendidos:900, freteGratis:true, entregaRapida:false, voltagens:null, destaque:true,
     specs:{ "Potência":"3000W", "Bateria":"Lítio 72V 40Ah removível", "Autonomia":"até 90 km", "Velocidade máx.":"75 km/h", "Recarga":"6 a 8 h em tomada comum", "Garantia":"1 ano (bateria 2 anos)" },
     descricao:"Para o dia a dia na cidade sem gasolina: bateria removível para carregar em casa, painel digital, freio a disco e partida por chave presencial." },
-  { id:"scooter-eletrica-city-2000", nome:"Scooter Elétrica City 2000W com Baú e Alarme", marca:"E-Ride", categoria:"motos", arte:"scooter", cor:"#e5484d",
+  { id:"scooter-eletrica-city-2000", imagens:["img/scooter-eletrica-city-2000.jpg"], nome:"Scooter Elétrica City 2000W com Baú e Alarme", marca:"E-Ride", categoria:"motos", arte:"scooter", cor:"#e5484d",
     preco:10990, precoAntigo:13490, estoque:9, avaliacao:4.7, avaliacoes:528, vendidos:1500, freteGratis:true, entregaRapida:false, voltagens:null, destaque:true,
     specs:{ "Potência":"2000W", "Bateria":"Lítio 60V 30Ah", "Autonomia":"até 70 km", "Velocidade máx.":"55 km/h", "Recarga":"5 a 7 h", "Extras":"Baú, alarme, ré e farol LED" },
     descricao:"Estilo clássico, assento confortável para dois e baú incluso. Ótima para entregas e deslocamentos curtos." },
@@ -109,6 +110,10 @@ const PRODUTOS = [
     preco:8999, precoAntigo:11499, estoque:4, avaliacao:4.9, avaliacoes:820, vendidos:1200, freteGratis:true, entregaRapida:false, voltagens:["127V","220V"], destaque:true,
     specs:{ "Capacidade":"602 litros", "Portas":"Side by Side", "Dispenser":"Água e gelo", "Tecnologia":"Inverter Digital", "Cor":"Inox Look escuro" },
     descricao:"Duas portas largas, dispenser de água gelada e gelo, e controle por app." },
+  { id:"geladeira-french-door-570l", imagens:["img/geladeira-french-door-570l.jpg"], nome:"Geladeira French Door Inverter 570L Inox com Dispenser de Água e Gelo e Porta de Vidro", marca:"Premium", categoria:"refrigeracao", arte:"geladeira2", cor:"#9ca3af",
+    preco:11999, precoAntigo:null, estoque:1000, avaliacao:0, avaliacoes:0, vendidos:0, freteGratis:true, entregaRapida:false, voltagens:["127V","220V"], destaque:true,
+    specs:{ "Capacidade":"570 litros", "Portas":"3 portas (French Door)", "Degelo":"Frost Free", "Dispenser":"Água gelada e gelo", "Porta de vidro":"Painel de vidro que acende com 2 toques: veja dentro sem abrir", "Tecnologia":"Compressor Inverter (economia de energia)", "Cor":"Inox", "Garantia":"12 meses" },
+    descricao:"Geladeira de 3 portas no estilo French Door, com acabamento em inox, dispenser de água gelada e gelo na porta e painel de vidro que permite ver os alimentos sem abrir a porta, reduzindo a perda de frio. Gaveta freezer inferior ampla e compressor inverter mais silencioso e econômico." },
 
   { id:"lava-seca-samsung-11kg", nome:"Lava e Seca 11kg Inverter com Vapor", marca:"Samsung", categoria:"lavanderia", arte:"lavadora", cor:"#f3f4f6",
     preco:3799, precoAntigo:4699, estoque:10, avaliacao:4.8, avaliacoes:3410, vendidos:6000, freteGratis:true, entregaRapida:false, voltagens:["127V","220V"], destaque:true,
