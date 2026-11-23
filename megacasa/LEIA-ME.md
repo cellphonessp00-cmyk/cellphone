@@ -121,6 +121,36 @@ A senha do cliente **nunca** vai para a planilha: ela fica guardada criptografad
 4. **Perfil da Empresa no Google** (business.google.com): aparece no Maps e nas buscas "loja de eletrodomésticos perto de mim".
 5. Coloque o link do site na bio do Instagram e nas respostas do WhatsApp.
 
+## 6) Se o site cair ou a compra parar de funcionar
+**1. Confirme se caiu mesmo.** Abra https://megacasasp.vercel.app no celular usando o 4G (sem Wi-Fi).
+Se abrir, o problema é na sua internet. Veja também se os serviços estão fora do ar:
+- vercel-status.com (hospedagem)
+- status.upstash.com (banco de dados)
+- status.mercadopago.com (pagamentos)
+
+Se um deles estiver com problema, é só esperar; não há nada a fazer do seu lado.
+
+**2. O site não abre (erro na página inicial):**
+1. vercel.com → projeto **megacasasp** → **Deployments**.
+2. Se o último deploy estiver vermelho (*Error*): o site **continua no ar com a versão anterior**, porque uma atualização que falha não derruba o site. Mande o print do erro.
+3. Se uma atualização recente entrou no ar e quebrou algo: no deploy anterior que funcionava (verde, *Ready*), clique em **⋯ → Promote to Production** (ou **Instant Rollback**). Em segundos o site volta como estava.
+
+**3. O site abre, mas cadastro, carrinho ou checkout dão erro:**
+1. Na Vercel, abra o projeto → **Logs** → filtre por `/api`. A mensagem vermelha diz a causa.
+2. Causas comuns:
+   - **Limite do banco grátis** (500 mil comandos/mês no Upstash). Veja em *Storage → Upstash → Open in Upstash*. Se lotar, troque para o plano *Pay As You Go* (centavos por mês no começo).
+   - **Token do Mercado Pago trocado ou expirado.** Gere de novo no painel do Mercado Pago, atualize `MP_ACCESS_TOKEN` em *Settings → Environment Variables* e faça **Redeploy**.
+   - **Variável alterada sem Redeploy.** Toda mudança em *Environment Variables* só vale depois de *Deployments → ⋯ → Redeploy*.
+
+**4. Pagou e o pedido não virou "Pago":** confira no Mercado Pago, em *Suas integrações → Webhooks → Histórico de notificações*. Lá aparece se o aviso chegou ao site. No painel `/admin/`, abra o pedido e clique em **↻ Consultar Mercado Pago**: o site consulta o pagamento e atualiza o pedido.
+
+**5. Cópia de segurança:** os pedidos ficam no banco (Upstash) **e** na planilha "Mega Casa SP - Pedidos". Uma vez por semana, exporte o CSV no painel (*Pedidos → ⬇ Exportar CSV*).
+
+**6. Para testar no computador sem internet:** rode `python dev_server.py` e abra http://localhost:8790.
+
+> Plano da Vercel: o plano grátis (*Hobby*) é para uso pessoal. Quando a loja começar a vender de verdade, passe para o **Pro**
+> (*Settings → Billing*). É o que os termos da Vercel pedem para sites comerciais, e o plano dá mais limites e suporte.
+
 ## Painel de vendas (CRM) — `/admin/`
 - **Visão geral:** vendas de hoje, 7 e 30 dias, ticket médio, conversão, gráfico de 14 dias, mais vendidos e alertas (pedidos para enviar, carrinhos sem pagamento há 24h, estoque baixo).
 - **Pedidos:** busca e filtro por status. No detalhe: dados do cliente, endereço, itens com voltagem, pagamento no Mercado Pago, mudança de status (Pago → Em separação → Faturado → Enviado → Entregue), código de rastreio, anotações, WhatsApp do cliente, impressão e exportação CSV.
