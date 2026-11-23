@@ -4,6 +4,7 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const fmt = v => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const porId = id => PRODUTOS.find(p => p.id === id);
 const desconto = p => p.precoAntigo > p.preco ? Math.round((1 - p.preco / p.precoAntigo) * 100) : 0;
+const TEM_DESC = PRODUTOS.some(p => desconto(p) > 0);
 const precoPix = v => v * (1 - LOJA.descontoPix / 100);
 const nomeCat = id => (CATEGORIAS.find(c => c.id === id) || {}).nome || id;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -162,9 +163,9 @@ function limpar() {
 
 /* ---------- home ---------- */
 const BANNERS = [
-  { tit: "Motos elétricas com até 20% OFF", txt: "Sem gasolina, sem rodízio. Bateria de lítio e entrega em SP.", selo: "MOBILIDADE ELÉTRICA", cat: "motos", fundo: "linear-gradient(120deg,#0b2d6b,#1d4ed8 60%,#06b6d4)", prod: "scooter-eletrica-city-2000" },
-  { tit: "Semana da Air Fryer", txt: "A partir de R$ 349,90 com 5% OFF no Pix.", selo: "MAIS VENDIDA DO BRASIL", cat: "cozinha", fundo: "linear-gradient(120deg,#7c2d12,#ea580c 60%,#facc15)", prod: "airfryer-mondial-5l" },
-  { tit: "Ar-condicionado inverter", txt: "Até 70% de economia de energia. 10x sem juros.", selo: "VERÃO 2026", cat: "climatizacao", fundo: "linear-gradient(120deg,#064e3b,#059669 60%,#a3e635)", prod: "ar-split-lg-12000" },
+  { tit: "Motos e scooters elétricas", txt: "Sem gasolina, sem rodízio. Bateria de lítio e entrega em SP.", selo: "MOBILIDADE ELÉTRICA", cat: "motos", fundo: "linear-gradient(120deg,#0b2d6b,#1d4ed8 60%,#06b6d4)", prod: "scooter-eletrica-city-2000" },
+  { tit: "Semana da Air Fryer", txt: "A partir de R$ 349,90 com 5% OFF no Pix.", selo: "DESTAQUE DA COZINHA", cat: "cozinha", fundo: "linear-gradient(120deg,#7c2d12,#ea580c 60%,#facc15)", prod: "airfryer-mondial-5l" },
+  { tit: "Ar-condicionado inverter", txt: "Tecnologia inverter: mais economia de energia. 10x sem juros.", selo: "VERÃO 2026", cat: "climatizacao", fundo: "linear-gradient(120deg,#064e3b,#059669 60%,#a3e635)", prod: "ar-split-lg-12000" },
   { tit: "Geladeiras e lava e seca", txt: "Frete grátis para toda a Grande SP.", selo: "CASA NOVA", cat: "refrigeracao", fundo: "linear-gradient(120deg,#312e81,#6d28d9 60%,#ec4899)", prod: "geladeira-french-door-570l" }
 ];
 let heroI = 0, heroTimer;
@@ -186,15 +187,15 @@ function irHero(i) {
 function renderHome() {
   $("#circulos").innerHTML = CATEGORIAS.map(c => `<button data-cat="${c.id}"><span class="bola">${c.icone}</span>${c.nome}</button>`).join("");
   const disp = PRODUTOS.filter(p => p.estoque > 0);
-  $("#ofertasDia").innerHTML = [...disp].sort((a, b) => desconto(b) - desconto(a)).slice(0, 10).map(cardHTML).join("");
+  // "Ofertas" só aparece quando algum produto tem preço antigo REAL (precoAntigo); senão, mostra os destaques
+  $("#titOfertas").textContent = TEM_DESC ? "⚡ Ofertas" : "⭐ Destaques";
+  $("#ofertasDia").innerHTML = (TEM_DESC ? disp.filter(p => desconto(p) > 0).sort((a, b) => desconto(b) - desconto(a))
+    : disp.filter(p => p.destaque)).slice(0, 10).map(cardHTML).join("");
   $("#mobilidade").innerHTML = PRODUTOS.filter(p => p.categoria === "motos" || p.categoria === "mobilidade").map(cardHTML).join("");
-  $("#maisVendidos").innerHTML = [...disp].sort((a, b) => b.vendidos - a.vendidos).slice(0, 10).map(cardHTML).join("");
-}
-
-function cronometro() {
-  const agora = new Date(), fim = new Date(agora); fim.setHours(23, 59, 59, 999);
-  const s = Math.max(0, Math.floor((fim - agora) / 1000));
-  $("#cronometro").textContent = [s / 3600, (s % 3600) / 60, s % 60].map(n => String(Math.floor(n)).padStart(2, "0")).join(":");
+  // "Mais vendidos" só com números reais de venda (LOJA.mostrarAvaliacoes); senão, uma seleção por preço
+  $("#titVendidos").textContent = AVAL ? "🔥 Mais vendidos" : "💰 Até R$ 700";
+  $("#maisVendidos").innerHTML = (AVAL ? [...disp].sort((a, b) => b.vendidos - a.vendidos)
+    : disp.filter(p => p.preco <= 700).sort((a, b) => a.preco - b.preco)).slice(0, 10).map(cardHTML).join("");
 }
 
 /* ---------- busca com sugestões ---------- */
@@ -461,7 +462,7 @@ function iniciarComum() {
   $("#linkWhats").href = `https://wa.me/${LOJA.whatsapp}`;
   if (cep) $("#cepTopoTxt").textContent = "Entregar em " + cep;
   rodape(); atualizarBolhas();
-  $("#menuCats").innerHTML = `<a href="${BASE}./">Todas</a>` + CATEGORIAS.map(c => `<a href="${BASE}./#c=${c.id}" data-cat="${c.id}">${c.icone} ${c.nome}</a>`).join("") + `<a href="${BASE}./#ofertas" data-ordem="desconto">🏷️ Ofertas</a>`;
+  $("#menuCats").innerHTML = `<a href="${BASE}./">Todas</a>` + CATEGORIAS.map(c => `<a href="${BASE}./#c=${c.id}" data-cat="${c.id}">${c.icone} ${c.nome}</a>`).join("") + (TEM_DESC ? `<a href="${BASE}./#ofertas" data-ordem="desconto">🏷️ Ofertas</a>` : "");
   $("#menuMobileLista").innerHTML = CATEGORIAS.map(c => `<a href="${BASE}./#c=${c.id}" data-cat="${c.id}"><span>${c.icone}</span>${c.nome}</a>`).join("");
   $("#q").addEventListener("input", sugerir);
   $("#q").addEventListener("keydown", e => {
@@ -515,9 +516,9 @@ function iniciarProduto(id) {
 
 function iniciar() {
   iniciarComum();
-  if (!AVAL) { $("#fNota")?.closest("label")?.remove(); $('#ordem option[value="nota"]')?.remove(); }
+  if (!AVAL) { $("#fNota")?.closest("label")?.remove(); $('#ordem option[value="nota"]')?.remove(); $('#ordem option[value="vendidos"]')?.remove(); }
+  if (!TEM_DESC) $('#ordem option[value="desconto"]')?.remove();
   renderHome(); renderHero(); renderCatalogo();
-  cronometro(); setInterval(cronometro, 1000);
   sincronizarEstoque().then(ok => { if (ok) { renderHome(); renderCatalogo(); } });
 
   $("#busca").addEventListener("submit", e => { e.preventDefault(); estado.q = $("#q").value.trim(); estado.cat = null; $("#sugestoes").hidden = true; renderCatalogo(); irCatalogo(); });
@@ -542,7 +543,7 @@ function iniciar() {
     if (k === "p" && v && porId(v)) { location.replace(`${BASE}produto/${v}/`); return; }
     if (k === "c" && v) { limpar(); estado.cat = v; renderCatalogo(); irCatalogo(); }
     else if (k === "q" && v) { limpar(); estado.q = v; $("#q").value = v; renderCatalogo(); irCatalogo(); }
-    else if (k === "ofertas") { limpar(); estado.ordem = "desconto"; renderCatalogo(); irCatalogo(); }
+    else if (k === "ofertas") { limpar(); estado.ordem = TEM_DESC ? "desconto" : "relevancia"; renderCatalogo(); irCatalogo(); }
   };
   window.addEventListener("hashchange", lerHash);
   lerHash();
