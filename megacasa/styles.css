@@ -332,7 +332,7 @@ a.mini{display:block}
   .preco{font-size:20px}
   .card-corpo{padding:8px 10px 12px}
   .rodape-cols{grid-template-columns:1fr}
-  .bloco{border-radius:0;margin-left:-16px;margin-right:-16px}
+  .bloco{border-radius:0;margin-left:0;margin-right:0}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 

@@ -26,7 +26,13 @@ class handler(BaseHTTPRequestHandler):
             if not L.webhook_assinatura_ok({k.lower(): v for k, v in self.headers.items()}, data_id):
                 print("webhook: assinatura inválida", flush=True)
                 return L.responder(self, 401, {"erro": "assinatura"})
-            pag = L.mp("GET", f"/v1/payments/{data_id}")
+            try:
+                pag = L.mp("GET", f"/v1/payments/{data_id}")
+            except RuntimeError as ex:
+                if "Mercado Pago 404" in str(ex):  # pagamento inexistente (ex.: botão "simular" do painel do MP)
+                    print(f"webhook: pagamento {data_id} não existe, ignorado", flush=True)
+                    return L.responder(self, 200, {"ok": True, "ignorado": True})
+                raise
             ped = L.atualizar_por_pagamento(pag)
             print(f"webhook: pagamento {data_id} {pag.get('status')} pedido {ped and ped['id']}", flush=True)
             return L.responder(self, 200, {"ok": True})
