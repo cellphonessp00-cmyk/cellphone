@@ -40,7 +40,7 @@ class handler(BaseHTTPRequestHandler):
                 pag = L.mp("GET", f"/v1/payments/{pay}")
                 if str(pag.get("external_reference")) == pid:
                     ped = L.atualizar_por_pagamento(pag) or ped
-            elif q.get("demo") == "1" and not L.MP_TOKEN() and ped["status"] == "aguardando_pagamento":
+            elif q.get("demo") == "1" and not L.MP_TOKEN() and not L.publicado() and ped["status"] == "aguardando_pagamento":
                 # só no modo de demonstração local (sem Mercado Pago configurado)
                 ped = L.atualizar_por_pagamento({"external_reference": pid, "status": "approved", "id": "demo",
                                                  "payment_method_id": ped["pagamento"], "installments": 1,

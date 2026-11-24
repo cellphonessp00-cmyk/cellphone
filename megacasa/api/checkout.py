@@ -1,4 +1,5 @@
-"""POST /api/checkout — valida o pedido, grava no CRM e cria o pagamento no Mercado Pago (Checkout Pro).
+"""POST /api/checkout — valida o pedido e grava no CRM como "aguardando pagamento".
+Devolve {pedido, k}; em seguida o navegador chama /api/preferencia, que cria o Checkout Pro no Mercado Pago.
 
 O navegador manda só ids, quantidades, voltagens, dados do cliente e a forma de pagamento.
 Preço, desconto, frete e estoque são recalculados aqui, a partir do catálogo.
@@ -18,6 +19,9 @@ class handler(BaseHTTPRequestHandler):
         try:
             if not L.limitar(self, "checkout", 20):
                 return L.responder(self, 429, {"erro": "Muitas tentativas. Aguarde alguns minutos."})
+            if L.publicado() and not L.MP_TOKEN():  # no ar, sem Mercado Pago não aceita pedido (nada de simulação)
+                print("checkout: MP_ACCESS_TOKEN ausente no servidor", flush=True)
+                return L.responder(self, 503, {"erro": "Pagamento indisponível no momento. Tente novamente em instantes."})
             d = L.ler_json(self)
             c = d.get("cliente") or {}
             e = d.get("entrega") or {}
@@ -72,58 +76,10 @@ class handler(BaseHTTPRequestHandler):
                 "notas": "",
             }
 
-            site = L.SITE()
-            acompanhar = f"{site}/pedido.html?id={pid}&k={chave}"
-            itens_mp = []
-            for it in carrinho["itens"]:
-                p = prods[it["id"]]
-                img = (p.get("imagens") or [None])[0]
-                itens_mp.append({
-                    "id": it["id"], "title": (it["nome"] + (f" ({it['voltagem']})" if it["voltagem"] else ""))[:250],
-                    "description": (p.get("descricao") or "")[:250], "category_id": "home_appliances",
-                    "quantity": it["quantidade"], "currency_id": "BRL",
-                    "unit_price": it["preco_pago"],
-                    **({"picture_url": f"{site}/{img}"} if img else {}),
-                })
-
-            excluir = {"pix": ["credit_card", "debit_card", "ticket", "prepaid_card"],
-                       "cartao": ["bank_transfer", "ticket", "atm"],
-                       "boleto": ["credit_card", "debit_card", "bank_transfer", "prepaid_card"]}[pagamento]
-            partes_nome = nome.split()
-            preferencia = {
-                "items": itens_mp,
-                "payer": {"name": partes_nome[0], "surname": " ".join(partes_nome[1:]), "email": email,
-                          "phone": {"area_code": tel[:2], "number": tel[2:]},
-                          "identification": {"type": "CPF", "number": cpf},
-                          "address": {"zip_code": cep, "street_name": pedido["entrega"]["rua"],
-                                      "street_number": pedido["entrega"]["numero"]}},
-                "shipments": {"cost": carrinho["frete"], "mode": "not_specified"},
-                "payment_methods": {"excluded_payment_types": [{"id": t} for t in excluir],
-                                    "installments": int(loja.get("parcelas", 10))},
-                "back_urls": {"success": acompanhar, "pending": acompanhar, "failure": acompanhar},
-                "auto_return": "approved",
-                "external_reference": pid,
-                "statement_descriptor": (loja.get("faturaCartao") or "MEGACASASP")[:13],
-                "binary_mode": False,
-                "expires": True,
-                "expiration_date_to": (L.datetime.now(L.BR) + L.timedelta(hours=72)).isoformat(timespec="milliseconds"),
-                "metadata": {"pedido_id": pid},
-            }
-            if site.startswith("https://"):
-                preferencia["notification_url"] = f"{site}/api/webhook?source_news=webhooks"
-
-            if L.MP_TOKEN():
-                r = L.mp("POST", "/checkout/preferences", preferencia, idem=pid)
-                link = r["init_point"]
-                pedido["mp_preferencia"] = r.get("id")
-            else:
-                # modo de demonstração (sem chave do Mercado Pago): simula o pagamento
-                link = f"{site}/pedido.html?id={pid}&k={chave}&demo=1"
-                pedido["mp_preferencia"] = "demo"
-            pedido["link_pagamento"] = link
+            # O pedido fica salvo como "aguardando pagamento"; o link do Mercado Pago é gerado por /api/preferencia
             L.salvar_pedido(pedido)
             L.planilha("pedidos", L.linha_pedido(pedido))  # planilha de pedidos com o endereço de entrega
-            return L.responder(self, 200, {"ok": True, "pedido": pid, "redirecionar": link})
+            return L.responder(self, 200, {"ok": True, "pedido": pid, "k": chave})
         except Exception as ex:  # nunca devolve detalhes internos ao cliente
             print("checkout erro:", repr(ex), flush=True)
             return L.responder(self, 500, {"erro": "Não conseguimos iniciar o pagamento agora. Tente de novo em instantes."})

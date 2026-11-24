@@ -432,6 +432,67 @@ def mp(metodo, caminho, corpo=None, idem=None):
         raise RuntimeError(f"Mercado Pago {e.code}: {e.read().decode()[:400]}")
 
 
+def publicado():
+    """True quando o site roda na Vercel (no ar). No ar NUNCA existe pagamento simulado."""
+    return bool(ENV("VERCEL")) or SITE().startswith("https://")
+
+
+def modo_mp():
+    """'teste' (token TEST-...), 'producao' (APP_USR-...) ou None se não houver token. Nunca expõe o token."""
+    t = MP_TOKEN()
+    if not t:
+        return None
+    return "teste" if t.startswith("TEST-") else "producao"
+
+
+def criar_preferencia(pedido):
+    """Cria a preferência do Checkout Pro no Mercado Pago para um pedido já salvo.
+    Devolve o link de pagamento (init_point). Valores vêm do pedido, que o servidor calculou."""
+    loja, prods = catalogo()
+    pid, site = pedido["id"], SITE()
+    acompanhar = f"{site}/pedido.html?id={pid}&k={pedido['chave']}"
+    itens_mp = []
+    for it in pedido["itens"]:
+        p = prods.get(it["id"]) or {}
+        img = (p.get("imagens") or [None])[0]
+        itens_mp.append({
+            "id": it["id"], "title": (it["nome"] + (f" ({it['voltagem']})" if it.get("voltagem") else ""))[:250],
+            "description": (p.get("descricao") or "")[:250], "category_id": "home_appliances",
+            "quantity": int(it["quantidade"]), "currency_id": "BRL", "unit_price": float(it["preco_pago"]),
+            **({"picture_url": f"{site}/{img}"} if img else {}),
+        })
+    c, e = pedido["cliente"], pedido["entrega"]
+    partes = c["nome"].split()
+    excluir = {"pix": ["credit_card", "debit_card", "ticket", "prepaid_card"],
+               "cartao": ["bank_transfer", "ticket", "atm"],
+               "boleto": ["credit_card", "debit_card", "bank_transfer", "prepaid_card"]}[pedido["pagamento"]]
+    pref = {
+        "items": itens_mp,
+        "payer": {"name": partes[0], "surname": " ".join(partes[1:]), "email": c["email"],
+                  "phone": {"area_code": c["telefone"][:2], "number": c["telefone"][2:]},
+                  "identification": {"type": "CPF", "number": c["cpf"]},
+                  "address": {"zip_code": e["cep"].replace("-", ""), "street_name": e["rua"], "street_number": e["numero"]}},
+        "shipments": {"cost": float(pedido["frete"]), "mode": "not_specified"},
+        "payment_methods": {"excluded_payment_types": [{"id": t} for t in excluir],
+                            "installments": int(loja.get("parcelas", 10))},
+        "back_urls": {"success": acompanhar, "pending": acompanhar, "failure": acompanhar},
+        "external_reference": pid,
+        "statement_descriptor": (loja.get("faturaCartao") or "MEGACASASP")[:13],
+        "expires": True,
+        "expiration_date_to": (datetime.now(BR) + timedelta(hours=72)).isoformat(timespec="milliseconds"),
+        "metadata": {"pedido_id": pid},
+    }
+    if site.startswith("https://"):
+        pref["auto_return"] = "approved"  # o MP só aceita auto_return com endereço https
+        pref["notification_url"] = f"{site}/api/webhook?source_news=webhooks"
+    tentativa = int(pedido.get("tentativas_pagamento", 0)) + 1
+    r = mp("POST", "/checkout/preferences", pref, idem=f"{pid}-{tentativa}")
+    link = (r.get("sandbox_init_point") if modo_mp() == "teste" else None) or r["init_point"]
+    pedido.update(mp_preferencia=r.get("id"), link_pagamento=link, tentativas_pagamento=tentativa)
+    salvar_pedido(pedido)
+    return link
+
+
 def webhook_assinatura_ok(headers, data_id):
     """Confere o cabeçalho x-signature do Mercado Pago (chave secreta do webhook)."""
     segredo = ENV("MP_WEBHOOK_SECRET", "")

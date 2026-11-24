@@ -143,9 +143,19 @@ form.addEventListener("submit", async e => {
       })
     });
     const d = await r.json().catch(() => ({}));
-    if (!r.ok || !d.redirecionar) throw new Error(d.erro || "Não foi possível gerar o pagamento.");
+    if (!r.ok || !d.pedido) throw new Error(d.erro || "Não foi possível registrar o pedido.");
     try { localStorage.setItem("mc_ultimo_pedido", d.pedido); localStorage.removeItem("mc_carrinho"); } catch {}
-    location.href = d.redirecionar;
+    const acompanhar = `pedido.html?id=${encodeURIComponent(d.pedido)}&k=${encodeURIComponent(d.k)}`;
+
+    // 2º passo: o servidor cria a preferência do Checkout Pro e devolve o link de pagamento do Mercado Pago
+    btn.textContent = "Abrindo o Mercado Pago…";
+    const rp = await fetch("api/preferencia", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: d.pedido, k: d.k })
+    });
+    const p = await rp.json().catch(() => ({}));
+    // se o link falhar, o pedido já existe: a página do pedido tem o botão para tentar pagar de novo
+    location.href = rp.ok && p.init_point ? p.init_point : acompanhar;
   } catch (ex) {
     erro.textContent = ex.message; erro.hidden = false;
     btn.disabled = false; btn.textContent = "🔒 Ir para o pagamento";

@@ -43,7 +43,7 @@ async function carregar() {
     <p class="muted" style="margin:0 0 4px">Pedido nº <b>${esc(p.id)}</b> · ${new Date(p.criado).toLocaleString("pt-BR")}</p>
     <h2 style="font-size:22px">${esc(titulo)}</h2>
     <span class="status-tag ${esc(p.status)}">${esc(NOMES[p.status] || p.status)}</span>
-    ${p.link_pagamento ? `<p style="margin-top:14px"><a class="btn btn-pri" href="${esc(p.link_pagamento)}">${p.status === "pagamento_recusado" ? "Tentar pagar novamente" : "Concluir pagamento"}</a></p>` : ""}
+    ${["aguardando_pagamento", "pagamento_recusado"].includes(p.status) ? `<p style="margin-top:14px"><button class="btn btn-pri" id="pagarAgora">${p.status === "pagamento_recusado" ? "Tentar pagar novamente" : "💳 Pagar agora"}</button></p><p class="erro-box" id="erroPagar" hidden></p>` : ""}
     ${p.status === "aguardando_pagamento" && p.pagamento === "boleto" ? `<p class="muted">O boleto pode levar até 3 dias úteis para compensar.</p>` : ""}
     ${p.rastreio ? `<p>📦 Código de rastreio: <b>${esc(p.rastreio)}</b> · <a href="https://rastreamento.correios.com.br/app/index.php" target="_blank" rel="noopener">Rastrear</a></p>` : ""}
   </section>
@@ -70,4 +70,21 @@ async function carregar() {
     }, 8000);
   }
 }
+
+// "Pagar agora": pede ao servidor um link novo do Checkout Pro (Mercado Pago) e redireciona
+document.addEventListener("click", async e => {
+  const b = e.target.closest("#pagarAgora");
+  if (!b) return;
+  const erro = $("#erroPagar");
+  b.disabled = true; b.textContent = "Abrindo o Mercado Pago…"; erro.hidden = true;
+  try {
+    const r = await fetch("api/preferencia", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: q.id, k: q.k }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.init_point) throw new Error(d.erro || "Não foi possível abrir o pagamento.");
+    location.href = d.init_point;
+  } catch (ex) {
+    erro.textContent = ex.message; erro.hidden = false;
+    b.disabled = false; b.textContent = "💳 Pagar agora";
+  }
+});
 carregar();
