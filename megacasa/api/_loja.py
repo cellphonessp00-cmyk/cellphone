@@ -21,7 +21,9 @@ RAIZ = Path(__file__).resolve().parent.parent
 BR = timezone(timedelta(hours=-3))
 
 ENV = os.environ.get
-MP_TOKEN = lambda: ENV("MP_ACCESS_TOKEN", "")
+# Nome oficial: MP_ACCESS_TOKEN. Aceita também "MP_ACESSTOKEN" (nome como foi salvo na Vercel; a Vercel não
+# deixa renomear variável sensível). Ao recriar a variável com o nome oficial, este apelido pode sair.
+MP_TOKEN = lambda: (ENV("MP_ACCESS_TOKEN") or ENV("MP_ACESSTOKEN") or "").strip()
 _segredo = {}
 
 
